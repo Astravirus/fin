@@ -1,6 +1,5 @@
-// Finance Tracker Pro — офлайн-режим v20 (Stale-While-Revalidate + мгновенный старт)
-const CACHE = 'finance-tracker-shell-v20';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
+const CACHE = 'finance-tracker-pages-v1';
+const SHELL = ['./', './index.html', './cashback.html', './analytics.html', './settings.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -30,8 +29,6 @@ self.addEventListener('fetch', (event) => {
     }).catch(() => null);
     if (cached) { event.waitUntil(refresh); return cached; }
     const res = await refresh;
-    return res || new Response('Нет сети, а приложение ещё не сохранено. Открой страницу один раз с интернетом.', {
-      status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-    });
+    return res || new Response('Нет сети', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   })());
 });

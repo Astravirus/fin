@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Finance Tracker — Кешбек</title>
+<link href="apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="icon-192.png" rel="icon" type="image/png"/>
+<link href="manifest.webmanifest" rel="manifest"/>
+<style>
+:root{
+  --bg:#0f1115;
+  --panel:#161a21;
+  --panel-2:#1c212a;
+  --line:#2a303c;
+  --text:#e8e6e1;
+  --muted:#8b93a3;
+  --amber:#e0a458;
+  --amber-soft:#e0a45822;
+  --gold:#c9a24b;
+  --green:#7fb88a;
+  --red:#d9776b;
+  --radius:10px;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:radial-gradient(1200px 600px at 20% -10%, #1a1f2a 0%, var(--bg) 60%);
+  color:var(--text);
+  font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+  padding:20px 16px 60px;
+  min-height:100vh;
+}
+.wrap{max-width:920px;margin:0 auto;}
+header{margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+h1{font-size:1.4rem;margin:0;letter-spacing:0.02em;color:var(--text);}
+.sub{color:var(--muted);font-size:0.8rem;margin-top:2px;}
+
+.page-nav{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;margin-bottom:22px;overflow-x:auto;}
+.page-link{flex:1;min-width:110px;background:transparent;border:1px solid transparent;border-radius:8px;color:var(--muted);padding:10px 12px;font-size:0.82rem;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;transition:background .15s,color .15s,border-color .15s;white-space:nowrap;display:block;}
+.page-link:hover{color:var(--text);background:var(--panel-2);}
+.page-link.active{background:var(--amber-soft);color:var(--amber);border-color:var(--amber);}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;}
+.card-title{font-size:0.82rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);margin-bottom:12px;font-weight:700;}
+
+form{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:20px;}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;align-items:start;}
+.grid > div{min-width:0;}
+.grid input,.grid select{min-width:0;max-width:100%;width:100%;}
+label{display:block;font-size:0.75rem;color:var(--muted);margin-bottom:4px;}
+input,select{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--text);padding:9px 10px;font-size:0.88rem;outline:none;}
+input:focus,select:focus{border-color:var(--amber);}
+
+.type-toggle{display:flex;gap:8px;margin-bottom:12px;}
+.type-toggle button{flex:1;padding:8px;border-radius:6px;border:1px solid var(--line);background:var(--panel-2);color:var(--muted);cursor:pointer;font-size:0.85rem;}
+.type-toggle button.active[data-type="expense"]{background:#d9776b22;border-color:var(--red);color:var(--red);}
+.type-toggle button.active[data-type="income"]{background:#7fb88a22;border-color:var(--green);color:var(--green);}
+
+.submit-row{margin-top:14px;display:flex;gap:10px;align-items:center;}
+.btn-add{background:var(--amber);color:#1a1206;border:none;padding:10px 20px;border-radius:6px;font-weight:600;cursor:pointer;font-size:0.88rem;}
+.btn-add:hover{filter:brightness(1.08);}
+.hint{font-size:0.75rem;color:var(--muted);}
+
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+thead th{text-align:left;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);background:var(--panel-2);}
+tbody td{padding:10px 12px;font-size:0.85rem;border-bottom:1px solid var(--line);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:#1c212a80;}
+.amt-expense{color:var(--red);}
+.amt-income{color:var(--green);}
+.cb{color:var(--amber);font-size:0.80rem;}
+.empty{text-align:center;padding:30px;color:var(--muted);font-size:0.85rem;}
+.bank-tag{font-size:0.72rem;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);}
+
+.bank-chip,.cat-chip{background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:5px 11px;font-size:0.76rem;color:var(--muted);cursor:pointer;display:inline-block;margin:2px;}
+.bank-chip.active,.cat-chip.active{background:var(--amber-soft);border-color:var(--amber);color:var(--amber);}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:#232936;border:1px solid var(--line);color:var(--text);padding:10px 14px;border-radius:10px;font-size:0.82rem;box-shadow:0 6px 24px #0009;z-index:50;}
+.toast[hidden]{display:none;}
+
+.history-controls{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.history-controls input{flex:1 1 180px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:0.84rem;color:var(--text);}
+.history-controls select{flex:0 0 auto;width:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:0.82rem;color:var(--text);}
+
+.ios-bank-bar{display:flex;align-items:center;gap:6px;overflow-x:auto;padding:8px 0 4px;margin-bottom:12px;scrollbar-width:none;}
+.ios-bank-pill{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:5px 11px;font-size:0.76rem;color:var(--text);text-decoration:none;cursor:pointer;}
+.ios-bank-pill .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px;}
+.summary-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;}
+.summary-card .label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.summary-card .value{font-size:1.2rem;font-weight:600;}
+.summary-card.income .value{color:var(--green);}
+.summary-card.expense .value{color:var(--red);}
+.summary-card.cashback .value{color:var(--amber);}
+.summary-card.balance .value{color:var(--gold);}
+
+  .cb-bank-card{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:12px;}
+  .cb-bank-head{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .cb-bank-head input[type="text"]{flex:1;font-weight:600;}
+  .cb-base-wrap{display:flex;align-items:center;gap:4px;font-size:0.78rem;color:var(--muted);white-space:nowrap;}
+  .cb-base-wrap input{width:56px;color:var(--amber);text-align:center;}
+  .cb-rates{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .cb-rate-pill{display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:4px 10px;font-size:0.76rem;}
+  .cb-rate-pill b{color:var(--amber);}
+  .cb-add-rate{display:flex;gap:6px;}
+  .cb-add-rate select{flex:1;font-size:0.78rem;}
+  .cb-add-rate input{width:56px;font-size:0.78rem;text-align:center;}
+  .cb-summary-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line);font-size:0.84rem;}
+  .cb-summary-row:last-child{border-bottom:none;}
+  .cb-summary-cat{width:100%;color:var(--text);margin-bottom:2px;font-weight:600;}
+  .cb-badge{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:3px 10px;font-size:0.76rem;color:var(--muted);}
+  .cb-badge b{color:var(--text);}
+  .cb-badge.best{background:#7fb88a1f;border-color:var(--green);color:var(--green);}
+  .cb-badge.best b{color:var(--green);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Finance Tracker</h1>
+      <div class="sub">Кешбек и выгодные карты</div>
+    </div>
+  </header>
+
+  
+<div class="page-nav">
+  <a href="index.html" class="page-link ">📝 Ввод и история</a>
+  <a href="cashback.html" class="page-link active">💳 Кешбек</a>
+  <a href="analytics.html" class="page-link ">📊 Аналитика</a>
+  <a href="settings.html" class="page-link ">⚙️ Настройки</a>
+</div>
+
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="btn-add" id="prevMonth" style="padding:6px 12px;background:var(--panel-2);color:var(--amber);border:1px solid var(--line);">←</button>
+      <div id="monthLabel" style="font-weight:600;font-size:1rem;min-width:140px;text-align:center;"></div>
+      <button class="btn-add" id="nextMonth" style="padding:6px 12px;background:var(--panel-2);color:var(--amber);border:1px solid var(--line);">→</button>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-add" id="icsReminderBtn" style="padding:8px 12px;background:var(--panel-2);color:var(--amber);border:1px solid var(--line);font-size:0.78rem;">📅 Напоминание в Календарь iOS</button>
+      <button class="btn-add" id="copyPrevPlanBtn" style="padding:8px 12px;background:var(--panel-2);color:var(--muted);border:1px solid var(--line);font-size:0.78rem;">📋 Скопировать с пред. месяца</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💳 Кешбек банков в этом месяце</div>
+    <div id="cbBankCards"></div>
+    <button class="btn-add" id="addBankPlanBtn" style="margin-top:8px;background:var(--panel-2);color:var(--amber);border:1px solid var(--line);font-size:0.82rem;">+ Добавить банк</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💡 Какой картой платить (подсказки по категориям)</div>
+    <div id="cbSummaryWrap"></div>
+  </div>
+</div>
+<div class="toast" hidden id="toast"></div>
+
+<script>
+const CASHBACK_PLAN_KEY = 'finance-cashback-plans';
+const CATEGORY_LIST_KEY = 'finance-categories';
+let cashbackPlans = {}, categoryList = [];
+const now0 = new Date();
+let viewYear = now0.getFullYear(), viewMonth = now0.getMonth();
+const $ = id => document.getElementById(id);
+
+function loadData(){
+  try{ cashbackPlans = JSON.parse(localStorage.getItem(CASHBACK_PLAN_KEY) || '{}'); }catch(e){ cashbackPlans = {}; }
+  try{ categoryList = JSON.parse(localStorage.getItem(CATEGORY_LIST_KEY) || '[]'); }catch(e){ categoryList = []; }
+  if(!categoryList.length) categoryList = [
+    {name:'Продукты', emoji:'🛒'},{name:'Фастфуд', emoji:'🍔'},{name:'Доставка', emoji:'📦'},
+    {name:'Транспорт', emoji:'🚌'},{name:'Ж/д билеты', emoji:'🚃'},{name:'Работа', emoji:'💼'},
+    {name:'Ежемесячные', emoji:'🏠'},{name:'Здоровье', emoji:'❤️‍🩹'},{name:'Красота', emoji:'💅'},
+    {name:'Одежда', emoji:'👕'},{name:'Электроника', emoji:'⚡️'},{name:'Товары для дома', emoji:'🧹'},
+    {name:'Другое', emoji:'🎲'},{name:'Развлечения', emoji:'👾'},{name:'Цветы', emoji:'💐'}
+  ];
+}
+function savePlans(){ localStorage.setItem(CASHBACK_PLAN_KEY, JSON.stringify(cashbackPlans)); }
+function monthKeyFor(y,m){ return y + '-' + String(m+1).padStart(2,'0'); }
+function currentPlanList(){
+  const key = monthKeyFor(viewYear, viewMonth);
+  if(!cashbackPlans[key]) cashbackPlans[key] = [];
+  return cashbackPlans[key];
+}
+function prevMonthKey(){
+  let y = viewYear, m = viewMonth - 1;
+  if(m < 0){ m = 11; y--; }
+  return monthKeyFor(y,m);
+}
+function parseNum(str){
+  if(str===null || str===undefined) return NaN;
+  const t = String(str).replace(/[\s\u00a0\u202f]/g, '').replace(',', '.');
+  return parseFloat(t);
+}
+function escapeHtml(str){ const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+function escapeAttr(str){ return escapeHtml(str).replace(/"/g, '&quot;'); }
+function categoryNames(){ return categoryList.map(c=>c.name); }
+function categoryLabel(name){ const f = categoryList.find(c=>c.name===name); return escapeHtml(f?f.emoji+' '+name:name); }
+
+function renderMonthLabel(){
+  const d = new Date(viewYear, viewMonth, 1);
+  let label = d.toLocaleDateString('ru-RU', {month:'long', year:'numeric'});
+  $('monthLabel').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+function renderCashbackPlan(){
+  renderMonthLabel();
+  const plan = currentPlanList();
+  const cardsEl = $('cbBankCards');
+  if(!plan.length){
+    cardsEl.innerHTML = '<div class="empty">Пока пусто — добавь банк и кешбек-категории на этот месяц.</div>';
+  }else{
+    cardsEl.innerHTML = plan.map(b=>{
+      const usedCats = Object.keys(b.rates || {});
+      const availCats = categoryNames().filter(c => !usedCats.includes(c));
+      const pills = usedCats.map(c=>`<span class="cb-rate-pill">${categoryLabel(c)} <b>${b.rates[c]}%</b> <button style="background:none;border:none;color:var(--muted);cursor:pointer;" data-action="del-rate" data-bank="${b.id}" data-cat="${escapeAttr(c)}">✕</button></span>`).join('');
+      const addRow = availCats.length ? `<div class="cb-add-rate" style="margin-top:6px;"><select data-role="cat-select" data-bank="${b.id}">${availCats.map(c=>'<option value="'+escapeAttr(c)+'">'+categoryLabel(c)+'</option>').join('')}</select><input type="text" inputmode="decimal" data-role="cat-pct" data-bank="${b.id}" placeholder="%"><button class="btn-add" data-action="add-rate" data-bank="${b.id}" style="padding:6px 12px;font-size:0.78rem;">+</button></div>` : '';
+      return `<div class="cb-bank-card" data-bank-id="${b.id}">
+        <div class="cb-bank-head">
+          <input type="text" data-role="bank-name" data-bank="${b.id}" value="${escapeAttr(b.bank)}" placeholder="Название банка">
+          <span class="cb-base-wrap">на всё <input type="text" inputmode="decimal" data-role="bank-base" data-bank="${b.id}" value="${b.base ?? ''}">%</span>
+          <button style="background:none;border:none;color:var(--muted);cursor:pointer;" data-action="del-bank" data-bank="${b.id}">✕</button>
+        </div>
+        <div class="cb-rates">${pills}</div>
+        ${addRow}
+      </div>`;
+    }).join('');
+  }
+  renderSummary(plan);
+}
+
+function renderSummary(plan){
+  const wrap = $('cbSummaryWrap');
+  const withData = plan.filter(b => b.bank && (Number(b.base) > 0 || Object.keys(b.rates||{}).length));
+  if(!withData.length){ wrap.innerHTML = '<div class="empty">Заполни кешбек банков выше, чтобы увидеть подсказки.</div>'; return; }
+
+  const badgesFor = rates => {
+    const list = rates.slice().sort((x,y)=>y.pct-x.pct);
+    const max = list[0].pct;
+    return list.map(r=>`<span class="cb-badge ${r.pct===max?'best':''}">${escapeHtml(r.bank)} <b>${r.pct}%</b></span>`).join(' ');
+  };
+
+  const known = categoryNames();
+  const rows = [];
+  known.forEach(cat=>{
+    const rates = withData.map(b=>({ bank: b.bank, pct: (b.rates && b.rates[cat]!==undefined)?Number(b.rates[cat]):Number(b.base||0) })).filter(r=>r.pct>0);
+    if(!rates.length) return;
+    rows.push(`<div class="cb-summary-row"><span class="cb-summary-cat">${categoryLabel(cat)}</span>${badgesFor(rates)}</div>`);
+  });
+  const baseRates = withData.map(b=>({ bank: b.bank, pct: Number(b.base||0) })).filter(r=>r.pct>0);
+  if(baseRates.length){
+    rows.push(`<div class="cb-summary-row"><span class="cb-summary-cat">🌐 Всё остальное</span>${badgesFor(baseRates)}</div>`);
+  }
+  wrap.innerHTML = rows.join('');
+}
+
+$('addBankPlanBtn').addEventListener('click', ()=>{
+  currentPlanList().push({ id: Date.now().toString(36), bank:'', base:'', rates:{} });
+  savePlans(); renderCashbackPlan();
+});
+
+$('copyPrevPlanBtn').addEventListener('click', ()=>{
+  const prev = cashbackPlans[prevMonthKey()];
+  if(!prev || !prev.length){ alert('В прошлом месяце нет данных'); return; }
+  cashbackPlans[monthKeyFor(viewYear, viewMonth)] = JSON.parse(JSON.stringify(prev)).map(b=>({...b, id: Math.random().toString(36)}));
+  savePlans(); renderCashbackPlan(); showToast('Скопировано ✓');
+});
+
+$('cbBankCards').addEventListener('input', e=>{
+  const t = e.target; const bankId = t.dataset.bank; if(!bankId) return;
+  const b = currentPlanList().find(x=>x.id===bankId); if(!b) return;
+  if(t.dataset.role==='bank-name') b.bank = t.value;
+  if(t.dataset.role==='bank-base') b.base = parseNum(t.value)||0;
+  savePlans(); renderSummary(currentPlanList());
+});
+
+$('cbBankCards').addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-action]'); if(!btn) return;
+  const act = btn.dataset.action; const bankId = btn.dataset.bank;
+  const plan = currentPlanList(); const b = plan.find(x=>x.id===bankId); if(!b) return;
+  if(act==='del-bank'){
+    plan.splice(plan.indexOf(b), 1);
+  }else if(act==='del-rate'){
+    delete b.rates[btn.dataset.cat];
+  }else if(act==='add-rate'){
+    const card = btn.closest('.cb-bank-card');
+    const cat = card.querySelector('select[data-role="cat-select"]').value;
+    const pct = parseNum(card.querySelector('input[data-role="cat-pct"]').value);
+    if(cat && !isNaN(pct)) b.rates[cat] = pct;
+  }
+  savePlans(); renderCashbackPlan();
+});
+
+$('prevMonth').addEventListener('click', ()=>{ viewMonth--; if(viewMonth<0){viewMonth=11; viewYear--;} renderCashbackPlan(); });
+$('nextMonth').addEventListener('click', ()=>{ viewMonth++; if(viewMonth>11){viewMonth=0; viewYear++;} renderCashbackPlan(); });
+
+function downloadIcs(){
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth()+1, 1, 10, 0, 0);
+  const pad = n=>String(n).padStart(2,'0');
+  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','BEGIN:VEVENT',
+    `DTSTAMP:${next.getFullYear()}${pad(next.getMonth()+1)}01T090000Z`,
+    `DTSTART:${next.getFullYear()}${pad(next.getMonth()+1)}01T100000`,
+    'RRULE:FREQ=MONTHLY;BYMONTHDAY=1',
+    'SUMMARY:💳 Обновить категории кешбека в банках',
+    'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], {type:'text/calendar'}));
+  a.download = 'cashback-reminder.ics'; a.click(); a.remove();
+  showToast('Напоминание (.ics) скачано ✓');
+}
+$('icsReminderBtn').addEventListener('click', downloadIcs);
+
+function showToast(m){ const t = $('toast'); t.innerHTML = '<span>'+escapeHtml(m)+'</span>'; t.hidden=false; setTimeout(()=>t.hidden=true, 3000); }
+
+loadData(); renderCashbackPlan();
+</script>
+</body>
+</html>
