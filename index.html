@@ -95,6 +95,53 @@ tbody tr:hover{background:#1c212a80;}
 .summary-card.expense .value{color:var(--red);}
 .summary-card.cashback .value{color:var(--amber);}
 .summary-card.balance .value{color:var(--gold);}
+
+  /* ===== iOS NATIVE TAB BAR (BOTTOM FIXED) ===== */
+  .ios-tab-bar{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:83px;
+    background:rgba(22, 26, 33, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top:1px solid rgba(42, 48, 60, 0.8);
+    display:flex;
+    justify-content:space-around;
+    align-items:flex-start;
+    padding-top:8px;
+    z-index:1000;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+  }
+  .ios-tab-item{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    color:var(--muted);
+    text-decoration:none;
+    font-size:0.68rem;
+    font-weight:600;
+    letter-spacing:0.02em;
+    transition:color .15s;
+    padding:4px 0;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .ios-tab-item .tab-icon{
+    font-size:1.4rem;
+    margin-bottom:2px;
+    line-height:1;
+  }
+  .ios-tab-item.active{
+    color:var(--amber);
+  }
+  body{
+    padding-bottom:100px !important;
+  }
+  .page-nav{display:none !important;} /* убираем старую верхнюю навигацию, раз есть крутой нижний бар */
+
 </style>
 </head>
 <body>
@@ -107,12 +154,7 @@ tbody tr:hover{background:#1c212a80;}
   </header>
 
   
-<div class="page-nav">
-  <a href="index.html" class="page-link active">📝 Ввод и история</a>
-  <a href="cashback.html" class="page-link ">💳 Кешбек</a>
-  <a href="analytics.html" class="page-link ">📊 Аналитика</a>
-  <a href="settings.html" class="page-link ">⚙️ Настройки</a>
-</div>
+
 
 
   <div class="ios-bank-bar" id="iosBankBar"></div>
@@ -177,7 +219,7 @@ tbody tr:hover{background:#1c212a80;}
           <option value="Развлечения">👾 Развлечения</option>
           <option value="Цветы">💐 Цветы</option>
         </select>
-        <div id="categoryChips" style="margin-top:6px;"></div>
+        
       </div>
     </div>
     <div class="submit-row">
@@ -486,5 +528,25 @@ $('f-date').value = ymd(new Date());
 $('f-date-text').value = new Date().toLocaleDateString();
 loadAllData(); updateCategorySelect(); updateCategoryChips(); updateBankChips(); renderTemplates(); renderTable(); renderIosBankBar();
 </script>
+
+<nav class="ios-tab-bar">
+  <a href="index.html" class="ios-tab-item active">
+    <span class="tab-icon">📝</span>
+    <span>Ввод</span>
+  </a>
+  <a href="cashback.html" class="ios-tab-item ">
+    <span class="tab-icon">💳</span>
+    <span>Кешбек</span>
+  </a>
+  <a href="analytics.html" class="ios-tab-item ">
+    <span class="tab-icon">📊</span>
+    <span>Итоги</span>
+  </a>
+  <a href="settings.html" class="ios-tab-item ">
+    <span class="tab-icon">⚙️</span>
+    <span>Настройки</span>
+  </a>
+</nav>
+
 </body>
 </html>
