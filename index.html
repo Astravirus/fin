@@ -2,423 +2,1278 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Finance Tracker — Ввод и история</title>
-<link href="apple-touch-icon.png" rel="apple-touch-icon"/>
-<link href="icon-192.png" rel="icon" type="image/png"/>
-<link href="manifest.webmanifest" rel="manifest"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>Finance Tracker</title>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Финансы"/>
+<meta name="theme-color" content="#090b0f"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<link rel="icon" type="image/png" href="icon-192.png"/>
+<link rel="manifest" href="manifest.webmanifest"/>
 <style>
-:root{
-  --bg:#0b0d10;
-  --panel:#141820;
-  --panel-2:#1c212c;
-  --line:#262f3f;
-  --text:#f3f2ef;
-  --muted:#8c96a8;
-  --amber:#f0b459;
-  --amber-soft:rgba(240, 180, 89, 0.15);
-  --gold:#d4af37;
-  --green:#72c184;
-  --red:#e37368;
-  --radius:14px;
-}
-*{box-sizing:border-box;}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-body{
-  margin:0;
-  background:radial-gradient(1200px 800px at 20% -10%, #171f2e 0%, var(--bg) 70%);
-  color:var(--text);
-  font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Icons', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  padding:20px 16px 110px;
-  min-height:100vh;
-  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  -webkit-font-smoothing: antialiased;
-}
-.wrap{max-width:880px;margin:0 auto;}
-header{margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:0 4px;}
-h1{font-size:1.5rem;margin:0;font-weight:700;letter-spacing:-0.01em;color:var(--text);}
-.sub{color:var(--muted);font-size:0.82rem;margin-top:3px;}
+  :root{
+    --bg:#090b0f;
+    --surface:#13161d;
+    --surface-2:#1b202a;
+    --surface-3:#232936;
+    --border:rgba(255,255,255,0.08);
+    --border-strong:rgba(255,255,255,0.14);
+    --text:#f5f5f7;
+    --muted:#8e96a6;
+    --accent:#f2b352;
+    --accent-soft:rgba(242,179,82,0.14);
+    --green:#4cd98b;
+    --green-soft:rgba(76,217,139,0.14);
+    --red:#ff6b6b;
+    --red-soft:rgba(255,107,107,0.14);
+    --blue:#58a6ff;
+    --r-lg:18px;
+    --r-md:13px;
+    --r-sm:9px;
+    --safe-top:env(safe-area-inset-top, 0px);
+    --safe-bottom:env(safe-area-inset-bottom, 0px);
+  }
 
-.card{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:16px;
-  margin-bottom:16px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
-  transition: transform 0.2s ease;
-}
-.card-title{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:12px;font-weight:700;}
+  *{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+  }
 
-form{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:18px;
-  margin-bottom:20px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
-}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px;align-items:start;}
-.grid > div{min-width:0;}
-.grid input,.grid select{min-width:0;max-width:100%;width:100%;}
-label{display:block;font-size:0.75rem;color:var(--muted);margin-bottom:5px;font-weight:600;}
-input,select{
-  width:100%;
-  background:var(--panel-2);
-  border:1px solid var(--line);
-  border-radius:10px;
-  color:var(--text);
-  padding:11px 12px;
-  font-size:0.92rem;
-  outline:none;
-  transition:border-color 0.2s, box-shadow 0.2s;
-}
-input:focus,select:focus{
-  border-color:var(--amber);
-  box-shadow: 0 0 0 3px rgba(240, 180, 89, 0.2);
-}
+  html, body{
+    margin:0;
+    padding:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    min-height:100vh;
+  }
 
-.type-toggle{display:flex;gap:8px;margin-bottom:14px;}
-.type-toggle button{
-  flex:1;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid var(--line);
-  background:var(--panel-2);
-  color:var(--muted);
-  cursor:pointer;
-  font-size:0.88rem;
-  font-weight:600;
-  transition: all 0.2s;
-}
-.type-toggle button.active[data-type="expense"]{background:rgba(227, 115, 104, 0.2);border-color:var(--red);color:var(--red);}
-.type-toggle button.active[data-type="income"]{background:rgba(114, 193, 132, 0.2);border-color:var(--green);color:var(--green);}
+  body{
+    background:radial-gradient(900px 500px at 50% -120px, #1a2130 0%, var(--bg) 65%);
+    padding-top:calc(var(--safe-top) + 12px);
+    padding-bottom:calc(var(--safe-bottom) + 92px);
+  }
 
-.submit-row{margin-top:16px;display:flex;gap:10px;align-items:center;}
-.btn-add{
-  background:var(--amber);
-  color:#111;
-  border:none;
-  padding:12px 22px;
-  border-radius:10px;
-  font-weight:700;
-  cursor:pointer;
-  font-size:0.92rem;
-  box-shadow: 0 4px 14px rgba(240, 180, 89, 0.3);
-  transition: transform 0.1s, filter 0.2s;
-}
-.btn-add:active{transform:scale(0.97);}
-.btn-add:hover{filter:brightness(1.08);}
-.hint{font-size:0.75rem;color:var(--muted);}
+  .app-shell{
+    max-width:600px;
+    margin:0 auto;
+    padding:0 14px;
+  }
 
-/* RESPONSIVE TABLE FIX */
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--panel);
-}
-table{width:100%;border-collapse:collapse;min-width:540px;}
-thead th{
-  text-align:left;
-  font-size:0.72rem;
-  text-transform:uppercase;
-  letter-spacing:0.05em;
-  color:var(--muted);
-  padding:12px 14px;
-  border-bottom:1px solid var(--line);
-  background:var(--panel-2);
-  font-weight:700;
-}
-tbody td{
-  padding:12px 14px;
-  font-size:0.88rem;
-  border-bottom:1px solid var(--line);
-}
-tbody tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:rgba(255,255,255,0.02);}
-.amt-expense{color:var(--red);font-weight:600;}
-.amt-income{color:var(--green);font-weight:600;}
-.cb{color:var(--amber);font-size:0.82rem;}
-.empty{text-align:center;padding:35px;color:var(--muted);font-size:0.88rem;}
-.bank-tag{
-  font-size:0.72rem;
-  padding:3px 9px;
-  border-radius:20px;
-  border:1px solid var(--line);
-  color:var(--muted);
-  background:var(--panel-2);
-  font-weight:600;
-}
+  /* ===== Top Header (Month Nav) ===== */
+  .top-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:14px;
+    padding:2px 2px;
+  }
+  .app-title{
+    font-size:1.25rem;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    margin:0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .month-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:4px 6px;
+  }
+  .month-pill button{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    border:none;
+    background:transparent;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
+    transition:background 0.15s, transform 0.1s;
+  }
+  .month-pill button:active{
+    background:var(--surface-2);
+    transform:scale(0.9);
+  }
+  .month-pill span{
+    font-size:0.82rem;
+    font-weight:600;
+    min-width:96px;
+    text-align:center;
+    color:var(--text);
+  }
 
-.bank-chip,.cat-chip{
-  background:var(--panel-2);
-  border:1px solid var(--line);
-  border-radius:18px;
-  padding:6px 12px;
-  font-size:0.78rem;
-  color:var(--muted);
-  cursor:pointer;
-  display:inline-block;
-  margin:3px;
-  font-weight:600;
-  transition: all 0.15s;
-}
-.bank-chip.active,.cat-chip.active{
-  background:var(--amber-soft);
-  border-color:var(--amber);
-  color:var(--amber);
-}
+  /* ===== Views & Smooth Transitions ===== */
+  .view{
+    display:none;
+  }
+  .view.active{
+    display:block;
+    animation:viewEnter 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes viewEnter{
+    from{ opacity:0; transform:translateY(10px) scale(0.99); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
 
-.toast{
-  position:fixed;
-  left:50%;
-  transform:translateX(-50%);
-  bottom:95px;
-  background:rgba(28, 33, 44, 0.95);
-  backdrop-filter: blur(12px);
-  border:1px solid var(--line);
-  color:var(--text);
-  padding:11px 18px;
-  border-radius:12px;
-  font-size:0.85rem;
-  font-weight:600;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  z-index:1100;
-  animation: fadeIn 0.2s ease-out;
-}
-.toast[hidden]{display:none;}
+  /* ===== Cards ===== */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-lg);
+    padding:15px;
+    margin-bottom:12px;
+  }
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .card-label{
+    font-size:0.74rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--muted);
+  }
 
-.history-controls{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-.history-controls input{flex:1 1 180px;}
-.history-controls select{flex:0 0 auto;width:auto;}
+  /* ===== Mini Summary Strip on Home ===== */
+  .mini-stats{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .mini-stat{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-md);
+    padding:10px 11px;
+  }
+  .mini-stat .k{
+    font-size:0.68rem;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin-bottom:3px;
+  }
+  .mini-stat .v{
+    font-size:0.95rem;
+    font-weight:700;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .v-bal{ color:var(--text); }
+  .v-exp{ color:var(--red); }
+  .v-cb{ color:var(--accent); }
+  .v-inc{ color:var(--green); }
 
-.ios-bank-bar{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  overflow-x:auto;
-  padding:4px 0 10px;
-  margin-bottom:14px;
-  scrollbar-width:none;
-  -webkit-overflow-scrolling:touch;
-}
-.ios-bank-bar::-webkit-scrollbar{display:none;}
-.ios-bank-pill{
-  flex:0 0 auto;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:20px;
-  padding:6px 12px;
-  font-size:0.78rem;
-  color:var(--text);
-  text-decoration:none;
-  cursor:pointer;
-  font-weight:600;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  transition: transform 0.1s;
-}
-.ios-bank-pill:active{transform:scale(0.96);}
-.ios-bank-pill .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  /* ===== Bank Redirectors Bar (Переходники банков) ===== */
+  .bank-bar-wrap{
+    margin-bottom:12px;
+  }
+  .bank-bar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    overflow-x:auto;
+    padding:2px 0 4px;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .bank-bar::-webkit-scrollbar{ display:none; }
+  .bank-pill{
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:8px 13px;
+    color:var(--text);
+    text-decoration:none;
+    font-size:0.8rem;
+    font-weight:600;
+    transition:transform 0.12s, border-color 0.15s, background 0.15s;
+  }
+  .bank-pill:active{
+    transform:scale(0.95);
+    border-color:var(--accent);
+    background:var(--surface-2);
+  }
+  .bank-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .bank-pill svg{
+    width:13px;
+    height:13px;
+    color:var(--muted);
+    flex-shrink:0;
+  }
 
-.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px;}
-.summary-card{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:14px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-.summary-card .label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;margin-bottom:5px;font-weight:700;}
-.summary-card .value{font-size:1.25rem;font-weight:700;}
-.summary-card.income .value{color:var(--green);}
-.summary-card.expense .value{color:var(--red);}
-.summary-card.cashback .value{color:var(--amber);}
-.summary-card.balance .value{color:var(--gold);}
+  /* ===== Cashback Reminder Banner ===== */
+  .banner{
+    background:linear-gradient(135deg, rgba(242,179,82,0.16), rgba(19,22,29,0.95));
+    border:1px solid rgba(242,179,82,0.38);
+    border-radius:var(--r-md);
+    padding:12px 14px;
+    margin-bottom:12px;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+  }
+  .banner[hidden]{ display:none !important; }
+  .banner-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:8px;
+    font-size:0.83rem;
+    line-height:1.4;
+  }
+  .banner-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
 
-/* ===== iOS NATIVE TAB BAR (BOTTOM FIXED) ===== */
-.ios-tab-bar{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  height:85px;
-  background:rgba(18, 22, 30, 0.88);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border-top:1px solid rgba(42, 48, 60, 0.6);
-  display:flex;
-  justify-content:space-around;
-  align-items:flex-start;
-  padding-top:8px;
-  z-index:1000;
-  box-shadow: 0 -6px 30px rgba(0,0,0,0.5);
-}
-.ios-tab-item{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  color:var(--muted);
-  text-decoration:none;
-  font-size:0.7rem;
-  font-weight:600;
-  letter-spacing:0.01em;
-  transition: color 0.2s, transform 0.1s;
-  padding:4px 0;
-  -webkit-tap-highlight-color:transparent;
-}
-.ios-tab-item:active{transform:scale(0.92);}
-.ios-tab-item .tab-icon{
-  font-size:1.45rem;
-  margin-bottom:3px;
-  line-height:1;
-}
-.ios-tab-item.active{
-  color:var(--amber);
-}
-body{
-  padding-bottom:110px !important;
-}
+  /* ===== Inputs & Controls ===== */
+  input, select, textarea{
+    width:100%;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:var(--r-sm);
+    color:var(--text);
+    padding:11px 12px;
+    font-size:16px; /* Prevents iOS Safari auto-zoom */
+    font-family:inherit;
+    outline:none;
+    transition:border-color 0.15s, box-shadow 0.15s;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238e96a6' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 11px center;
+    padding-right:32px;
+  }
+  input:focus, select:focus, textarea:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(242,179,82,0.16);
+  }
+  label.field-lbl{
+    display:block;
+    font-size:0.73rem;
+    font-weight:600;
+    color:var(--muted);
+    margin-bottom:5px;
+  }
+
+  /* iOS Segmented Control */
+  .segmented{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:4px;
+    background:var(--surface-2);
+    padding:4px;
+    border-radius:11px;
+    margin-bottom:12px;
+  }
+  .segmented button{
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    padding:9px 8px;
+    border-radius:8px;
+    font-size:0.86rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.18s;
+  }
+  .segmented button.active[data-type="expense"],
+  .segmented button.active[data-etype="expense"]{
+    background:var(--red-soft);
+    color:var(--red);
+  }
+  .segmented button.active[data-type="income"],
+  .segmented button.active[data-etype="income"]{
+    background:var(--green-soft);
+    color:var(--green);
+  }
+
+  /* Quick Input & Templates */
+  .quick-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .quick-row input{
+    flex:1;
+    padding:10px 12px;
+    font-size:15px;
+  }
+  .tpl-row{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding-bottom:2px;
+    scrollbar-width:none;
+  }
+  .tpl-row::-webkit-scrollbar{ display:none; }
+  .tpl-chip{
+    flex:0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:6px 11px;
+    font-size:0.76rem;
+    font-weight:600;
+    color:var(--text);
+    cursor:pointer;
+  }
+  .tpl-chip:active{ transform:scale(0.95); border-color:var(--accent); }
+  .tpl-chip .x{
+    color:var(--muted);
+    font-size:0.74rem;
+    padding:0 2px;
+  }
+
+  .form-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:10px;
+  }
+  .form-grid .span2{ grid-column:1 / -1; }
+
+  .datebox{ position:relative; }
+  .datebox .date-display{ pointer-events:none; }
+  .datebox input[type="date"]{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    cursor:pointer;
+  }
+
+  .chips-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:7px;
+  }
+  .chip{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:5px 11px;
+    font-size:0.75rem;
+    font-weight:600;
+    color:var(--muted);
+    cursor:pointer;
+    transition:all 0.14s;
+  }
+  .chip.active{
+    background:var(--accent-soft);
+    border-color:var(--accent);
+    color:var(--accent);
+  }
+
+  .auto-badge{
+    font-size:0.7rem;
+    font-weight:700;
+    color:var(--accent);
+    background:var(--accent-soft);
+    padding:2px 7px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .best-hint{
+    margin-top:6px;
+    padding:8px 10px;
+    border-radius:var(--r-sm);
+    background:var(--green-soft);
+    border:1px solid rgba(76,217,139,0.3);
+    color:var(--green);
+    font-size:0.76rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .best-hint button{
+    background:var(--green);
+    color:#07190e;
+    border:none;
+    border-radius:7px;
+    padding:4px 9px;
+    font-size:0.73rem;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    border:none;
+    border-radius:11px;
+    padding:12px 16px;
+    font-size:0.9rem;
+    font-weight:700;
+    cursor:pointer;
+    font-family:inherit;
+    transition:transform 0.1s, filter 0.15s;
+    text-decoration:none;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn-primary{
+    background:var(--accent);
+    color:#140e04;
+  }
+  .btn-secondary{
+    background:var(--surface-2);
+    color:var(--text);
+    border:1px solid var(--border);
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--muted);
+    border:1px solid var(--border);
+  }
+  .btn-sm{
+    padding:7px 11px;
+    font-size:0.78rem;
+    border-radius:8px;
+  }
+  .btn-full{ width:100%; }
+
+  /* ===== Native iOS Transaction List (No Wide Table!) ===== */
+  .filter-bar{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .filter-bar input{
+    grid-column:1 / -1;
+    padding:9px 12px;
+    font-size:15px;
+  }
+  .filter-bar select{
+    padding:8px 28px 8px 10px;
+    font-size:14px;
+  }
+
+  .tx-month-hdr{
+    font-size:0.76rem;
+    font-weight:700;
+    color:var(--accent);
+    text-transform:capitalize;
+    padding:10px 4px 6px;
+    letter-spacing:0.02em;
+  }
+  .tx-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .tx-item{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:11px 12px;
+    transition:transform 0.12s, background 0.12s;
+  }
+  .tx-item:active{ transform:scale(0.985); background:var(--surface-3); }
+  .tx-ico{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.2rem;
+    flex-shrink:0;
+  }
+  .tx-main{
+    flex:1;
+    min-width:0;
+    cursor:pointer;
+  }
+  .tx-desc{
+    font-size:0.9rem;
+    font-weight:600;
+    color:var(--text);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .tx-meta{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-top:3px;
+    font-size:0.74rem;
+    color:var(--muted);
+    flex-wrap:wrap;
+  }
+  .tx-tag{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:1px 6px;
+    font-size:0.69rem;
+    color:var(--muted);
+  }
+  .tx-right{
+    text-align:right;
+    flex-shrink:0;
+  }
+  .tx-amt{
+    font-size:0.92rem;
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .tx-cb{
+    font-size:0.72rem;
+    color:var(--accent);
+    margin-top:2px;
+  }
+  .tx-acts{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    margin-left:2px;
+  }
+  .tx-act-btn{
+    width:28px;
+    height:28px;
+    border-radius:8px;
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
+  }
+  .tx-act-btn:active{ background:var(--surface); color:var(--text); }
+  .tx-act-btn.del:active{ color:var(--red); }
+
+  .empty{
+    text-align:center;
+    padding:28px 12px;
+    color:var(--muted);
+    font-size:0.86rem;
+  }
+
+  /* ===== Cashback View ===== */
+  .cb-bank-card{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:12px;
+    margin-bottom:10px;
+  }
+  .cb-bank-head{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:9px;
+  }
+  .cb-bank-head input[type="text"]{
+    flex:1;
+    padding:8px 10px;
+    font-size:15px;
+    font-weight:600;
+    background:var(--surface);
+  }
+  .cb-base{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    font-size:0.75rem;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .cb-base input{
+    width:52px;
+    padding:7px 4px;
+    text-align:center;
+    font-size:14px;
+    color:var(--accent);
+    font-weight:700;
+    background:var(--surface);
+  }
+  .cb-pills{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:9px;
+  }
+  .cb-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:4px 9px;
+    font-size:0.76rem;
+  }
+  .cb-pill b{ color:var(--accent); }
+  .cb-pill button{
+    background:none;
+    border:none;
+    color:var(--muted);
+    cursor:pointer;
+    padding:0 2px;
+    font-size:0.8rem;
+  }
+  .cb-add-row{
+    display:flex;
+    gap:6px;
+  }
+  .cb-add-row select{
+    flex:1;
+    padding:8px 28px 8px 9px;
+    font-size:14px;
+    background-color:var(--surface);
+  }
+  .cb-add-row input{
+    width:58px;
+    padding:8px 4px;
+    text-align:center;
+    font-size:14px;
+    background:var(--surface);
+  }
+  .best-row{
+    padding:10px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .best-row:last-child{ border-bottom:none; }
+  .best-cat{
+    font-size:0.84rem;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .best-badges{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .cb-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:5px 10px;
+    font-size:0.76rem;
+    color:var(--muted);
+    text-decoration:none;
+  }
+  .cb-badge b{ color:var(--text); }
+  .cb-badge.best{
+    background:var(--green-soft);
+    border-color:rgba(76,217,139,0.45);
+    color:var(--green);
+  }
+  .cb-badge.best b{ color:var(--green); }
+
+  /* ===== Analytics View ===== */
+  .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .stats-grid .span2{ grid-column:1 / -1; }
+  .stat-box{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--r-md);
+    padding:12px 14px;
+  }
+  .stat-box .k{
+    font-size:0.7rem;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-bottom:4px;
+  }
+  .stat-box .v{
+    font-size:1.18rem;
+    font-weight:700;
+  }
+
+  .cat-bar-row{
+    padding:9px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .cat-bar-row:last-child{ border-bottom:none; }
+  .cat-bar-top{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.85rem;
+    margin-bottom:6px;
+  }
+  .cat-track{
+    height:7px;
+    background:var(--surface-2);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .cat-fill{
+    height:100%;
+    border-radius:999px;
+    transition:width 0.3s ease;
+  }
+
+  /* Balance Dynamics Chart */
+  .dyn-readout{ min-height:46px; margin-bottom:8px; }
+  .dyn-date{ font-size:0.74rem; color:var(--muted); text-transform:capitalize; }
+  .dyn-row{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-top:2px; }
+  .dyn-bal{ font-size:1.15rem; font-weight:700; color:var(--accent); }
+  .dyn-delta{ font-size:0.78rem; display:flex; gap:8px; }
+  .dyn-chart{ display:flex; align-items:stretch; }
+  .dyn-axis{ flex:0 0 auto; display:block; }
+  .dyn-scroll{
+    flex:1 1 auto;
+    min-width:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .dyn-scroll::-webkit-scrollbar{ display:none; }
+  .dyn-caption{ font-size:0.72rem; color:var(--muted); margin-top:8px; line-height:1.45; }
+
+  .bank-stat-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
+  }
+  .bank-stat-card{
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:11px 12px;
+  }
+  .bank-stat-card .bn{
+    font-weight:700;
+    font-size:0.86rem;
+    color:var(--accent);
+    margin-bottom:6px;
+  }
+  .bank-stat-card .br{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.76rem;
+    color:var(--muted);
+    padding:2px 0;
+  }
+  .bank-stat-card .br b{ color:var(--text); }
+
+  /* ===== Settings: Bank Redirectors Editor ===== */
+  .redir-row{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px 12px;
+    margin-bottom:8px;
+  }
+  .redir-top{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .redir-top input{
+    flex:1;
+    padding:7px 10px;
+    font-size:14px;
+    font-weight:600;
+    background:var(--surface);
+  }
+  .redir-url{
+    display:flex;
+    gap:6px;
+    align-items:center;
+  }
+  .redir-url input{
+    flex:1;
+    padding:7px 10px;
+    font-size:13px;
+    color:var(--muted);
+    background:var(--surface);
+  }
+
+  .code-box{
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+    font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size:0.74rem;
+    color:var(--accent);
+    word-break:break-all;
+    margin:8px 0;
+  }
+
+  /* ===== Fixed Bottom iOS Tab Bar ===== */
+  .ios-tabbar{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:1000;
+    background:rgba(15, 18, 25, 0.86);
+    backdrop-filter:blur(26px) saturate(180%);
+    -webkit-backdrop-filter:blur(26px) saturate(180%);
+    border-top:1px solid var(--border);
+    padding:8px 8px calc(var(--safe-bottom) + 8px);
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+  }
+  .tab-btn{
+    flex:1;
+    max-width:120px;
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    padding:4px 0;
+    cursor:pointer;
+    font-family:inherit;
+    transition:color 0.18s, transform 0.12s;
+  }
+  .tab-btn:active{ transform:scale(0.9); }
+  .tab-btn svg{
+    width:23px;
+    height:23px;
+    stroke-width:1.9;
+  }
+  .tab-btn span{
+    font-size:0.66rem;
+    font-weight:600;
+    letter-spacing:0.01em;
+  }
+  .tab-btn.active{
+    color:var(--accent);
+  }
+
+  /* ===== Bottom Sheet Modal (Edit) ===== */
+  .modal{
+    position:fixed;
+    inset:0;
+    z-index:1200;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .modal[hidden]{ display:none !important; }
+  .modal-bg{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.65);
+    backdrop-filter:blur(4px);
+  }
+  .modal-sheet{
+    position:relative;
+    width:100%;
+    max-width:600px;
+    max-height:88vh;
+    background:var(--surface);
+    border-top:1px solid var(--border-strong);
+    border-radius:22px 22px 0 0;
+    display:flex;
+    flex-direction:column;
+    animation:sheetUp 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes sheetUp{
+    from{ transform:translateY(100%); }
+    to{ transform:translateY(0); }
+  }
+  .sheet-handle{
+    width:38px;
+    height:4px;
+    border-radius:99px;
+    background:rgba(255,255,255,0.2);
+    margin:10px auto 4px;
+  }
+  .modal-body{
+    padding:10px 16px 14px;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .modal-footer{
+    padding:10px 16px calc(var(--safe-bottom) + 14px);
+    border-top:1px solid var(--border);
+    display:flex;
+    gap:10px;
+  }
+
+  /* ===== Toast ===== */
+  .toast{
+    position:fixed;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:calc(var(--safe-bottom) + 84px);
+    background:rgba(27, 32, 42, 0.96);
+    backdrop-filter:blur(14px);
+    border:1px solid var(--border-strong);
+    color:var(--text);
+    padding:10px 16px;
+    border-radius:14px;
+    font-size:0.84rem;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    box-shadow:0 12px 32px rgba(0,0,0,0.55);
+    z-index:1300;
+    max-width:calc(100vw - 28px);
+  }
+  .toast[hidden]{ display:none !important; }
+  .toast button{
+    background:none;
+    border:none;
+    color:var(--accent);
+    font-weight:700;
+    font-size:0.84rem;
+    cursor:pointer;
+    padding:2px 4px;
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>Finance Tracker</h1>
-      <div class="sub">Ввод и история операций</div>
+
+<div class="app-shell">
+  <!-- Header -->
+  <header class="top-bar">
+    <h1 class="app-title" id="pageHeading">Финансы</h1>
+    <div class="month-pill">
+      <button type="button" id="prevMonth" aria-label="Предыдущий месяц">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span id="monthLabel"></span>
+      <button type="button" id="nextMonth" aria-label="Следующий месяц">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
     </div>
   </header>
 
-  <div class="ios-bank-bar" id="iosBankBar"></div>
-
-  <form id="entryForm">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;flex-wrap:wrap;">
-      <div class="card-title" style="margin-bottom:0;">Новая запись</div>
-      <button type="button" id="saveAsTplBtn" style="background:var(--panel-2);color:var(--amber);border:1px solid var(--line);border-radius:8px;padding:5px 12px;font-size:0.75rem;cursor:pointer;font-weight:600;">⚡ Шаблон</button>
-    </div>
-    <div style="background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px;">
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="text" id="smartQuickInput" placeholder="⚡ Быстрый ввод: Кофе 250 Т-Банк" autocomplete="off"/>
-        <button type="button" class="btn-add" id="smartQuickBtn" style="padding:9px 16px;font-size:0.85rem;">Внести</button>
+  <!-- ==================== VIEW 1: HOME (ВВОД И ИСТОРИЯ) ==================== -->
+  <section class="view active" id="view-home">
+    <!-- Cashback reminder banner -->
+    <div class="banner" hidden id="cbReminderBanner">
+      <div class="banner-top">
+        <div id="cbReminderText">Пора обновить категории кешбека на этот месяц.</div>
+        <button type="button" id="cbRemindDismiss" style="background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:0 4px;">✕</button>
       </div>
-      <div id="tplChipsWrap" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
-    </div>
-
-    <div class="type-toggle">
-      <button class="active" data-type="expense" type="button">Расход</button>
-      <button data-type="income" type="button">Доход</button>
+      <div class="banner-actions">
+        <button type="button" class="btn btn-primary btn-sm" id="cbRemindOpen">Настроить кешбек</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="cbRemindCopy">Скопировать с пред. месяца</button>
+      </div>
     </div>
 
-    <div class="grid">
-      <div>
-        <label>Дата</label>
-        <div style="position:relative;"><input id="f-date-text" type="text" readonly tabindex="-1" placeholder="—"/><input id="f-date" required="" type="date" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;"/></div>
-      </div>
-      <div>
-        <label id="descLabel">Описание</label>
-        <input id="f-desc" placeholder="Что купил" required="" type="text"/>
-      </div>
-      <div>
-        <label>Сумма, ₽</label>
-        <input id="f-amount" inputmode="decimal" placeholder="0" required="" type="text"/>
-      </div>
-      <div>
-        <label id="bankLabel">Банк</label>
-        <input autocomplete="off" id="f-bank" list="bankSuggestions" placeholder="Название банка" type="text"/>
-        <datalist id="bankSuggestions"></datalist>
-        <div id="bankChips" style="margin-top:6px;"></div>
-      </div>
-      <div id="cashbackField">
-        <label style="display:flex;align-items:center;justify-content:space-between;"><span>Кешбек, ₽</span><span id="autoCbBadge" style="font-size:0.7rem;color:var(--amber);background:var(--amber-soft);padding:2px 7px;border-radius:8px;cursor:pointer;">авто: 0%</span></label>
-        <input id="f-cashback" inputmode="decimal" placeholder="0" type="text"/>
-      </div>
-      <div id="categoryField">
-        <label>Категория</label>
-        <select id="f-category">
-          <option value="Продукты">🛒 Продукты</option>
-          <option value="Фастфуд">🍔 Фастфуд</option>
-          <option value="Доставка">📦 Доставка</option>
-          <option value="Транспорт">🚌 Транспорт</option>
-          <option value="Ж/д билеты">🚃 Ж/д билеты</option>
-          <option value="Работа">💼 Работа</option>
-          <option value="Ежемесячные">🏠 Ежемесячные</option>
-          <option value="Здоровье">❤️‍🩹 Здоровье</option>
-          <option value="Красота">💅 Красота</option>
-          <option value="Одежда">👕 Одежда</option>
-          <option value="Электроника">⚡️ Электроника</option>
-          <option value="Товары для дома">🧹 Товары для дома</option>
-          <option value="Другое">🎲 Другое</option>
-          <option value="Развлечения">👾 Развлечения</option>
-          <option value="Цветы">💐 Цветы</option>
-        </select>
-      </div>
-    </div>
-    <div class="submit-row">
-      <button class="btn-add" type="submit">Добавить</button>
-      <span class="hint" id="formHint"></span>
-    </div>
-  </form>
+    <!-- Mini stats -->
+    <div class="mini-stats" id="miniStats"></div>
 
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-      <div class="card-title" style="margin-bottom:0;">📜 История операций</div>
-      <span id="historyFilterCount" style="font-size:0.75rem;color:var(--muted);font-weight:600;"></span>
+    <!-- Working Bank Redirectors (Переходники банков) -->
+    <div class="bank-bar-wrap">
+      <div class="bank-bar" id="bankRedirectBar"></div>
     </div>
-    <div class="history-controls">
-      <input type="search" id="historySearch" placeholder="🔍 Поиск по описанию, сумме..."/>
-      <select id="historyBankFilter"><option value="">Все банки</option></select>
-      <select id="historyCatFilter"><option value="">Все категории</option></select>
+
+    <!-- Quick 1-Line Input + Templates -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">Быстрый ввод</span>
+        <button type="button" class="btn btn-ghost btn-sm" id="saveTplBtn">+ Шаблон</button>
+      </div>
+      <div class="quick-row">
+        <input type="text" id="smartInput" placeholder="Кофе 250 Т-Банк" autocomplete="off"/>
+        <button type="button" class="btn btn-primary btn-sm" id="smartAddBtn" style="padding:0 16px;">OK</button>
+      </div>
+      <div class="tpl-row" id="tplRow"></div>
     </div>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Дата</th>
-            <th>Описание</th>
-            <th>Категория</th>
-            <th>Банк</th>
-            <th>Сумма</th>
-            <th>Кешбек</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
+
+    <!-- Main Entry Form -->
+    <form class="card" id="entryForm">
+      <div class="segmented" id="typeToggle">
+        <button type="button" class="active" data-type="expense">Расход</button>
+        <button type="button" data-type="income">Доход</button>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label class="field-lbl">Сумма, ₽</label>
+          <input type="text" inputmode="decimal" id="f-amount" placeholder="0" required autocomplete="off"/>
+        </div>
+        <div>
+          <label class="field-lbl">Дата</label>
+          <div class="datebox">
+            <input type="text" class="date-display" id="f-date-text" readonly tabindex="-1" aria-hidden="true"/>
+            <input type="date" id="f-date" required aria-label="Дата"/>
+          </div>
+        </div>
+        <div class="span2">
+          <label class="field-lbl" id="descLabel">Описание</label>
+          <input type="text" id="f-desc" placeholder="Магазин, кофе, такси..." required autocomplete="off"/>
+        </div>
+        <div class="span2">
+          <label class="field-lbl" id="bankLabel">Банк</label>
+          <input type="text" id="f-bank" list="bankSuggestions" placeholder="Выбери или введи банк" autocomplete="off"/>
+          <datalist id="bankSuggestions"></datalist>
+          <div class="chips-row" id="bankChips"></div>
+        </div>
+        <div id="categoryField">
+          <label class="field-lbl">Категория</label>
+          <select id="f-category"></select>
+        </div>
+        <div id="cashbackField">
+          <label class="field-lbl" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>Кешбек, ₽</span>
+            <span class="auto-badge" id="autoCbBadge">0%</span>
+          </label>
+          <input type="text" inputmode="decimal" id="f-cashback" placeholder="Авто" autocomplete="off"/>
+        </div>
+        <div class="span2" id="bestBankHint" style="display:none;"></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" style="margin-top:14px;">Добавить запись</button>
+    </form>
+
+    <!-- Native Card History -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">История операций</span>
+        <span id="historyCount" style="font-size:0.75rem;color:var(--muted);font-weight:600;"></span>
+      </div>
+      <div class="filter-bar">
+        <input type="search" id="historySearch" placeholder="Поиск по описанию, сумме, банку..."/>
+        <select id="historyBankFilter"><option value="">Все банки</option></select>
+        <select id="historyCatFilter"><option value="">Все категории</option></select>
+      </div>
+      <div id="txContainer"></div>
     </div>
-    <div class="empty" id="emptyState" style="display:none;">Пока пусто. Добавь первую запись выше.</div>
+  </section>
+
+  <!-- ==================== VIEW 2: CASHBACK (КЕШБЕК) ==================== -->
+  <section class="view" id="view-cashback">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">Какой картой платить</span>
+        <button type="button" class="btn btn-secondary btn-sm" id="icsBtn">В Календарь iOS</button>
+      </div>
+      <div id="cbSummaryWrap"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">Условия банков на месяц</span>
+        <button type="button" class="btn btn-ghost btn-sm" id="copyPrevPlanBtn">С пред. месяца</button>
+      </div>
+      <div id="cbBankCards"></div>
+      <button type="button" class="btn btn-secondary btn-full" id="addBankPlanBtn" style="margin-top:6px;">+ Добавить банк</button>
+    </div>
+  </section>
+
+  <!-- ==================== VIEW 3: ANALYTICS (ИТОГИ) ==================== -->
+  <section class="view" id="view-analytics">
+    <div class="stats-grid" id="analyticsSummary"></div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">Динамика баланса</span>
+      </div>
+      <div class="dyn-readout" id="dynReadout"></div>
+      <div class="dyn-chart">
+        <svg class="dyn-axis" height="190" id="dynamicsAxis" width="44"></svg>
+        <div class="dyn-scroll" id="dynamicsScroll"><svg height="190" id="dynamicsChart"></svg></div>
+      </div>
+      <div class="dyn-caption" id="dynCaption"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">Расходы по категориям</span>
+      </div>
+      <div id="categoryBreakdown"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">По банкам за месяц</span>
+      </div>
+      <div class="bank-stat-grid" id="bankBreakdown"></div>
+    </div>
+  </section>
+
+  <!-- ==================== VIEW 4: SETTINGS (НАСТРОЙКИ) ==================== -->
+  <section class="view" id="view-settings">
+    <!-- Bank Redirectors Configurator -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">Переходники банков (iOS)</span>
+        <button type="button" class="btn btn-ghost btn-sm" id="resetRedirBtn">Сбросить</button>
+      </div>
+      <p style="font-size:0.8rem;color:var(--muted);margin:0 0 12px;line-height:1.45;">
+        По умолчанию используются рабочие веб-переходники банков (открываются в Safari или перехватываются приложением). Если у тебя есть замаскированное приложение банка, можешь вписать сюда ссылку вида <code>shortcuts://run-shortcut?name=Сбер</code>.
+      </p>
+      <div id="redirEditorList"></div>
+      <button type="button" class="btn btn-secondary btn-full" id="addRedirBtn" style="margin-top:6px;">+ Добавить переходник</button>
+    </div>
+
+    <!-- Backup & Export -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">Бэкап и экспорт</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <button type="button" class="btn btn-primary btn-sm" id="saveBackupBtn">Сохранить JSON</button>
+        <label class="btn btn-secondary btn-sm" for="loadBackupInput" style="margin:0;">Загрузить JSON</label>
+        <input type="file" id="loadBackupInput" accept=".json,application/json" style="display:none;"/>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm btn-full" id="exportCsvBtn">Экспорт в Excel (CSV)</button>
+    </div>
+
+    <!-- Categories Manager -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">Категории расходов</span>
+      </div>
+      <div id="catManageList" style="display:flex;flex-direction:column;gap:7px;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="newCatEmoji" placeholder="🏷️" style="width:52px;text-align:center;padding:9px 4px;"/>
+        <input type="text" id="newCatName" placeholder="Новая категория" style="flex:1;padding:9px 10px;"/>
+        <button type="button" class="btn btn-primary btn-sm" id="addCatBtn" style="padding:0 16px;">+</button>
+      </div>
+    </div>
+
+    <!-- iOS Shortcuts Automation -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-label">Автоматизация iOS (Команды)</span>
+      </div>
+      <p style="font-size:0.8rem;color:var(--muted);margin:0 0 8px;line-height:1.45;">
+        Передавай траты в трекер напрямую из приложения «Команды» (Shortcuts) через URL-параметры. При <code>auto=1</code> запись сохранится сама, а кешбек посчитается по тарифу:
+      </p>
+      <div class="code-box" id="shortcutUrlBox"></div>
+      <button type="button" class="btn btn-secondary btn-sm btn-full" id="copyShortcutBtn">Скопировать шаблон ссылки</button>
+    </div>
+  </section>
+</div>
+
+<!-- Fixed Bottom iOS Tab Bar -->
+<nav class="ios-tabbar" role="tablist">
+  <button type="button" class="tab-btn active" data-view="home" role="tab" aria-selected="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    <span>Ввод</span>
+  </button>
+  <button type="button" class="tab-btn" data-view="cashback" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    <span>Кешбек</span>
+  </button>
+  <button type="button" class="tab-btn" data-view="analytics" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span>Итоги</span>
+  </button>
+  <button type="button" class="tab-btn" data-view="settings" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>Настройки</span>
+  </button>
+</nav>
+
+<!-- Edit Transaction Bottom Sheet -->
+<div class="modal" hidden id="editModal">
+  <div class="modal-bg" id="editBg"></div>
+  <div class="modal-sheet" role="dialog" aria-modal="true">
+    <div class="sheet-handle"></div>
+    <div class="modal-body">
+      <div class="card-label" style="margin-bottom:10px;">Редактировать операцию</div>
+      <div class="segmented" id="editTypeToggle">
+        <button type="button" class="active" data-etype="expense">Расход</button>
+        <button type="button" data-etype="income">Доход</button>
+      </div>
+      <div class="form-grid">
+        <div>
+          <label class="field-lbl">Сумма, ₽</label>
+          <input type="text" inputmode="decimal" id="e-amount" autocomplete="off"/>
+        </div>
+        <div>
+          <label class="field-lbl">Дата</label>
+          <div class="datebox">
+            <input type="text" class="date-display" id="e-date-text" readonly tabindex="-1"/>
+            <input type="date" id="e-date"/>
+          </div>
+        </div>
+        <div class="span2">
+          <label class="field-lbl">Описание</label>
+          <input type="text" id="e-desc" autocomplete="off"/>
+        </div>
+        <div class="span2">
+          <label class="field-lbl">Банк</label>
+          <input type="text" id="e-bank" list="bankSuggestions" autocomplete="off"/>
+        </div>
+        <div id="eCatWrap">
+          <label class="field-lbl">Категория</label>
+          <select id="e-category"></select>
+        </div>
+        <div id="eCbWrap">
+          <label class="field-lbl">Кешбек, ₽</label>
+          <input type="text" inputmode="decimal" id="e-cashback" autocomplete="off"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ghost" id="eCancel" style="flex:1;">Отмена</button>
+      <button type="button" class="btn btn-primary" id="eSave" style="flex:2;">Сохранить</button>
+    </div>
   </div>
 </div>
-<div class="toast" hidden id="toast"></div>
 
-<nav class="ios-tab-bar">
-  <a href="index.html" class="ios-tab-item active">
-    <span class="tab-icon">📝</span>
-    <span>Ввод</span>
-  </a>
-  <a href="cashback.html" class="ios-tab-item">
-    <span class="tab-icon">💳</span>
-    <span>Кешбек</span>
-  </a>
-  <a href="analytics.html" class="ios-tab-item">
-    <span class="tab-icon">📊</span>
-    <span>Итоги</span>
-  </a>
-  <a href="settings.html" class="ios-tab-item">
-    <span class="tab-icon">⚙️</span>
-    <span>Настройки</span>
-  </a>
-</nav>
+<div class="toast" hidden id="toast"></div>
 
 <script>
 const STORAGE_KEY = 'finance-entries-all';
@@ -426,260 +1281,1182 @@ const CASHBACK_PLAN_KEY = 'finance-cashback-plans';
 const CATEGORY_LIST_KEY = 'finance-categories';
 const BANK_LABELS_KEY = 'finance-bank-labels';
 const TEMPLATES_KEY = 'finance-quick-templates';
+const REDIRECTORS_KEY = 'finance-bank-redirectors';
+const CB_DISMISS_KEY = 'finance-cb-remind-dismissed';
 
-let entries = [], cashbackPlans = {}, categoryList = [], bankLabels = {}, quickTemplates = [];
+const DEFAULT_CATEGORIES = [
+  {name:'Продукты', emoji:'🛒'},
+  {name:'Фастфуд', emoji:'🍔'},
+  {name:'Доставка', emoji:'📦'},
+  {name:'Транспорт', emoji:'🚌'},
+  {name:'Ежемесячные', emoji:'🏠'},
+  {name:'Здоровье', emoji:'❤️‍🩹'},
+  {name:'Одежда', emoji:'👕'},
+  {name:'Развлечения', emoji:'🎮'},
+  {name:'Электроника', emoji:'⚡️'},
+  {name:'Товары для дома', emoji:'🧹'},
+  {name:'Красота', emoji:'✨'},
+  {name:'Работа', emoji:'💼'},
+  {name:'Цветы', emoji:'💐'},
+  {name:'Другое', emoji:'🎲'}
+];
+
+// Рабочие веб-переходники и универсальные ссылки банков для iOS
+const DEFAULT_REDIRECTORS = [
+  { id:'tbank', name:'Т-Банк', url:'https://www.tbank.ru/mybank/', color:'#ffdd2d' },
+  { id:'sber', name:'Сбер', url:'https://online.sberbank.ru/CSAFront/index.do', color:'#21a038' },
+  { id:'alfa', name:'Альфа', url:'https://web.alfabank.ru/', color:'#ef3124' },
+  { id:'vtb', name:'ВТБ', url:'https://online.vtb.ru/', color:'#009fdf' },
+  { id:'ozon', name:'Озон', url:'https://finance.ozon.ru/', color:'#005bff' },
+  { id:'yandex', name:'Яндекс Пэй', url:'https://bank.yandex.ru/', color:'#fc3f1d' },
+  { id:'gpb', name:'Газпромбанк', url:'https://ib.online.gpb.ru/', color:'#476bf0' }
+];
+
+const DEFAULT_TEMPLATES = [
+  { desc:'Кофе', amount:'250', cat:'Фастфуд', bank:'' },
+  { desc:'Продукты', amount:'', cat:'Продукты', bank:'' },
+  { desc:'Проезд', amount:'40', cat:'Транспорт', bank:'' },
+  { desc:'Обед', amount:'450', cat:'Фастфуд', bank:'' }
+];
+
+const CAT_COLORS = ['#f2b352','#4cd98b','#58a6ff','#ff6b6b','#c084fc','#f472b6','#2dd4bf','#fbbf24','#94a3b8','#fb923c'];
+
+let entries = [];
+let cashbackPlans = {};
+let categoryList = [];
+let quickTemplates = [];
+let redirectors = [];
+let bankLabels = {};
+
 let currentType = 'expense';
+let activeView = 'home';
+let userEditedCb = false;
+const now0 = new Date();
+let viewYear = now0.getFullYear();
+let viewMonth = now0.getMonth();
+
 const $ = id => document.getElementById(id);
 
-function parseNum(str){
-  if(str === null || str === undefined) return NaN;
-  const t = String(str).replace(/[\s\u00a0\u202f]/g, '').replace(',', '.');
+// ===== Utilities =====
+function newId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function ymd(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function monthKeyFor(y,m){ return y + '-' + String(m+1).padStart(2,'0'); }
+function prevMonthKey(){ let y=viewYear, m=viewMonth-1; if(m<0){m=11; y--;} return monthKeyFor(y,m); }
+function parseNum(s){
+  if(s===null || s===undefined) return NaN;
+  const t = String(s).replace(/[\s\u00a0\u202f]/g,'').replace(',','.');
   if(!/^-?(\d+\.?\d*|\.\d+)$/.test(t)) return NaN;
   return parseFloat(t);
 }
 function fmt(n){
   let v = Math.round(n*100)/100;
-  if(v === 0) v = 0;
-  return new Intl.NumberFormat('ru-RU', {minimumFractionDigits:2, maximumFractionDigits:2}).format(v) + ' ₽';
+  if(v===0) v=0;
+  return new Intl.NumberFormat('ru-RU', {minimumFractionDigits:0, maximumFractionDigits:2}).format(v) + ' ₽';
 }
-function ymd(d){
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s??''; return d.innerHTML; }
+function escapeAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
+function firstGrapheme(str){
+  str = (str||'').trim();
+  if(!str) return '';
+  if(typeof Intl!=='undefined' && Intl.Segmenter){
+    const it = new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(str)[Symbol.iterator]().next();
+    return it.done ? '' : it.value.segment;
+  }
+  return Array.from(str)[0];
 }
-function newId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
-function escapeHtml(str){ const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
-function escapeAttr(str){ return escapeHtml(str).replace(/"/g, '&quot;'); }
-
-function loadAllData(){
-  try{ entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }catch(e){ entries = []; }
-  try{ cashbackPlans = JSON.parse(localStorage.getItem(CASHBACK_PLAN_KEY) || '{}'); }catch(e){ cashbackPlans = {}; }
-  try{ categoryList = JSON.parse(localStorage.getItem(CATEGORY_LIST_KEY) || '[]'); }catch(e){ categoryList = []; }
-  try{ bankLabels = JSON.parse(localStorage.getItem(BANK_LABELS_KEY) || '{}'); }catch(e){ bankLabels = {}; }
-  try{ quickTemplates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]'); }catch(e){ quickTemplates = []; }
-  if(!categoryList.length) categoryList = [
-    {name:'Продукты', emoji:'🛒'},{name:'Фастфуд', emoji:'🍔'},{name:'Доставка', emoji:'📦'},
-    {name:'Транспорт', emoji:'🚌'},{name:'Ж/д билеты', emoji:'🚃'},{name:'Работа', emoji:'💼'},
-    {name:'Ежемесячные', emoji:'🏠'},{name:'Здоровье', emoji:'❤️‍🩹'},{name:'Красота', emoji:'💅'},
-    {name:'Одежда', emoji:'👕'},{name:'Электроника', emoji:'⚡️'},{name:'Товары для дома', emoji:'🧹'},
-    {name:'Другое', emoji:'🎲'},{name:'Развлечения', emoji:'👾'},{name:'Цветы', emoji:'💐'}
-  ];
+function catEmoji(name){
+  const f = categoryList.find(c=>c.name===name);
+  return f ? f.emoji : '💳';
 }
-function saveEntries(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+function catColor(name){
+  const i = categoryList.findIndex(c=>c.name===name);
+  return i>=0 ? CAT_COLORS[i % CAT_COLORS.length] : '#8e96a6';
+}
+function catNames(){ return categoryList.map(c=>c.name); }
 
-const IOS_BANK_LINKS = [
-  { name: 'Т-Банк', match: /тиньк|т-банк|t-bank|tinkoff/i, url: 'tinkoffbank://', color: '#ffdd2d' },
-  { name: 'Сбер', match: /сбер|sber/i, url: 'sberbankonline://', color: '#21a038' },
-  { name: 'Альфабанк', match: /альфа|alfa/i, url: 'alfabank://', color: '#ef3124' },
-  { name: 'ВТБ', match: /втб|vtb/i, url: 'vtb://', color: '#009fdf' },
-  { name: 'Озон', match: /озон|ozon/i, url: 'ozon://', color: '#005bff' },
-  { name: 'Яндекс', match: /яндекс|yandex/i, url: 'yandexpay://', color: '#fc3f1d' }
-];
+// ===== Storage =====
+function loadAll(){
+  try{ entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); if(!Array.isArray(entries)) entries=[]; }catch(e){ entries=[]; }
+  try{ cashbackPlans = JSON.parse(localStorage.getItem(CASHBACK_PLAN_KEY) || '{}'); }catch(e){ cashbackPlans={}; }
+  try{
+    const c = JSON.parse(localStorage.getItem(CATEGORY_LIST_KEY) || 'null');
+    categoryList = (Array.isArray(c) && c.length) ? c : JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+  }catch(e){ categoryList = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)); }
+  try{
+    const t = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || 'null');
+    quickTemplates = Array.isArray(t) ? t : JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+  }catch(e){ quickTemplates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES)); }
+  try{
+    const r = JSON.parse(localStorage.getItem(REDIRECTORS_KEY) || 'null');
+    redirectors = (Array.isArray(r) && r.length) ? r : JSON.parse(JSON.stringify(DEFAULT_REDIRECTORS));
+  }catch(e){ redirectors = JSON.parse(JSON.stringify(DEFAULT_REDIRECTORS)); }
+  try{ bankLabels = JSON.parse(localStorage.getItem(BANK_LABELS_KEY) || '{}'); }catch(e){ bankLabels={}; }
+}
+function saveEntries(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }catch(e){} }
+function savePlans(){ try{ localStorage.setItem(CASHBACK_PLAN_KEY, JSON.stringify(cashbackPlans)); }catch(e){} }
+function saveCats(){ try{ localStorage.setItem(CATEGORY_LIST_KEY, JSON.stringify(categoryList)); }catch(e){} }
+function saveTemplates(){ try{ localStorage.setItem(TEMPLATES_KEY, JSON.stringify(quickTemplates)); }catch(e){} }
+function saveRedirectors(){ try{ localStorage.setItem(REDIRECTORS_KEY, JSON.stringify(redirectors)); }catch(e){} }
 
+// ===== Navigation (Fixed Bottom iOS Tab Bar) =====
+const VIEW_TITLES = { home:'Финансы', cashback:'Кешбек', analytics:'Итоги', settings:'Настройки' };
+function switchView(name){
+  if(!VIEW_TITLES[name]) name = 'home';
+  activeView = name;
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    const isAct = b.dataset.view === name;
+    b.classList.toggle('active', isAct);
+    b.setAttribute('aria-selected', String(isAct));
+  });
+  $('pageHeading').textContent = VIEW_TITLES[name];
+  window.scrollTo({ top:0, behavior:'instant' });
+  if(name === 'analytics') requestAnimationFrame(scrollDynamicsToSelected);
+}
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchView(btn.dataset.view));
+});
+
+// ===== Date Mirroring for iOS =====
+function fmtDateDevice(v){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v||'')) return '';
+  return new Date(Number(v.slice(0,4)), Number(v.slice(5,7))-1, Number(v.slice(8,10)))
+    .toLocaleDateString('ru-RU', {day:'numeric', month:'short'});
+}
+function mirrorDate(inputId, textId){
+  const input = $(inputId), text = $(textId);
+  const desc = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  const update = () => { text.value = fmtDateDevice(desc.get.call(input)); };
+  Object.defineProperty(input, 'value', {
+    configurable:true,
+    get(){ return desc.get.call(this); },
+    set(v){ desc.set.call(this, v); update(); }
+  });
+  input.addEventListener('input', update);
+  input.addEventListener('change', update);
+  update();
+}
+mirrorDate('f-date', 'f-date-text');
+mirrorDate('e-date', 'e-date-text');
+
+function defaultDateForView(){
+  const n = new Date();
+  if(viewYear===n.getFullYear() && viewMonth===n.getMonth()) return ymd(n);
+  return ymd(new Date(viewYear, viewMonth, 1));
+}
+
+// ===== Data Helpers =====
+function monthEntries(){
+  return entries.filter(e => {
+    if(!e.date) return false;
+    const d = new Date(e.date + 'T00:00:00');
+    return d.getFullYear()===viewYear && d.getMonth()===viewMonth;
+  });
+}
+function carryoverBalance(){
+  const start = new Date(viewYear, viewMonth, 1);
+  return entries.reduce((s,e) => {
+    const d = new Date(e.date + 'T00:00:00');
+    return d < start ? s + (e.type==='income' ? e.amount : -e.amount) : s;
+  }, 0);
+}
+function currentPlanList(){
+  const key = monthKeyFor(viewYear, viewMonth);
+  if(!cashbackPlans[key]) cashbackPlans[key] = [];
+  return cashbackPlans[key];
+}
 function allKnownBanks(){
-  const set = new Set([...entries.map(e=>e.bank), ...Object.keys(bankLabels)].filter(Boolean));
-  return [...set].sort();
+  const set = new Set([
+    ...entries.map(e=>e.bank).filter(Boolean),
+    ...Object.values(cashbackPlans).flat().map(b=>b.bank).filter(Boolean),
+    ...redirectors.map(r=>r.name).filter(Boolean)
+  ]);
+  return [...set];
+}
+function findRedirector(bankName){
+  if(!bankName) return null;
+  const low = bankName.trim().toLowerCase();
+  return redirectors.find(r => r.name.toLowerCase() === low || low.includes(r.name.toLowerCase()) || r.name.toLowerCase().includes(low)) || null;
 }
 
-function renderIosBankBar(){
-  const bar = $('iosBankBar'); if(!bar) return;
-  const known = allKnownBanks();
-  const list = []; const used = new Set();
-  known.forEach(bName => {
-    const info = IOS_BANK_LINKS.find(b => b.match.test(bName));
-    if(info && !used.has(info.name)){ used.add(info.name); list.push({ label: bankLabels[bName] || bName, url: info.url, color: info.color, bank: bName }); }
-  });
-  IOS_BANK_LINKS.forEach(info => {
-    if(!used.has(info.name)){ used.add(info.name); list.push({ label: info.name, url: info.url, color: info.color, bank: info.name }); }
-  });
-  bar.innerHTML = `<span style="font-size:0.72rem;color:var(--muted);white-space:nowrap;padding-right:4px;font-weight:700;">📱 Банки:</span>` +
-    list.map(item => `<a class="ios-bank-pill" href="${escapeAttr(item.url)}" data-select-bank="${escapeAttr(item.bank)}"><span class="dot" style="background:${item.color}"></span><span>${escapeHtml(item.label)}</span> <span style="opacity:0.6;">↗</span></a>`).join('');
-}
-
-$('iosBankBar').addEventListener('click', (ev)=>{
-  const pill = ev.target.closest('.ios-bank-pill'); if(!pill) return;
-  const b = pill.dataset.selectBank;
-  if(b){ $('f-bank').value = b; $('f-bank').dispatchEvent(new Event('input')); autoCalculateCashback(); }
-});
-
-function updateCategorySelect(){
-  const sel = $('f-category'); const cur = sel.value;
-  sel.innerHTML = categoryList.map(c=>`<option value="${escapeAttr(c.name)}">${c.emoji} ${escapeHtml(c.name)}</option>`).join('');
-  if(categoryNames().includes(cur)) sel.value = cur;
-}
-function categoryNames(){ return categoryList.map(c=>c.name); }
-
-function updateBankChips(){
-  const list = allKnownBanks().slice(0, 8);
-  const cur = $('f-bank').value;
-  $('bankChips').innerHTML = list.map(b=>`<span class="bank-chip ${b===cur?'active':''}" data-bank="${escapeAttr(b)}">${escapeHtml(bankLabels[b]||b)}</span>`).join('');
-}
-$('bankChips').addEventListener('click', ev=>{
-  const chip = ev.target.closest('.bank-chip'); if(!chip) return;
-  $('f-bank').value = chip.dataset.bank;
-  updateBankChips(); autoCalculateCashback(false);
-});
-$('f-bank').addEventListener('input', updateBankChips);
-
-let userEditedCashbackManually = false;
-$('f-cashback').addEventListener('input', ()=>{ userEditedCashbackManually = $('f-cashback').value.trim() !== ''; });
-
-function currentMonthKey(){
-  const d = new Date($('f-date').value || new Date());
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-}
-function getRateForBankAndCat(bankName, catName){
+// ===== Cashback Calculation =====
+function getRateFor(bankName, catName){
   if(!bankName) return 0;
-  const plan = cashbackPlans[currentMonthKey()] || [];
-  const found = plan.find(b => (b.bank||'').trim().toLowerCase() === bankName.trim().toLowerCase());
+  const plan = currentPlanList();
+  const norm = bankName.trim().toLowerCase();
+  const found = plan.find(b => (b.bank||'').trim().toLowerCase() === norm);
   if(!found) return 0;
   if(catName && found.rates && found.rates[catName] !== undefined) return Number(found.rates[catName]) || 0;
   return Number(found.base) || 0;
 }
-function autoCalculateCashback(force){
+function getBestBankFor(catName){
+  const plan = currentPlanList().filter(b => b.bank);
+  let best = null;
+  plan.forEach(b => {
+    const pct = (catName && b.rates && b.rates[catName] !== undefined) ? Number(b.rates[catName]) : Number(b.base || 0);
+    if(pct > 0 && (!best || pct > best.pct)) best = { bank:b.bank, pct };
+  });
+  return best;
+}
+function autoCalcCashback(force){
   if(currentType !== 'expense') return;
   const bank = $('f-bank').value.trim();
   const cat = $('f-category').value;
-  const amount = parseNum($('f-amount').value);
-  const pct = getRateForBankAndCat(bank, cat);
-  $('autoCbBadge').textContent = pct > 0 ? `тариф: ${pct}%` : 'тариф: 0%';
-  if((!userEditedCashbackManually || force) && !isNaN(amount) && amount > 0 && pct > 0){
-    const cb = Math.round(amount * (pct / 100) * 100) / 100;
-    $('f-cashback').value = String(cb).replace('.', ',');
+  const amt = parseNum($('f-amount').value);
+  const pct = getRateFor(bank, cat);
+  $('autoCbBadge').textContent = pct > 0 ? pct + '%' : '0%';
+  if((!userEditedCb || force) && !isNaN(amt) && amt > 0){
+    if(pct > 0){
+      const rub = Math.round(amt * (pct / 100) * 100) / 100;
+      $('f-cashback').value = String(rub).replace('.', ',');
+    } else if(force || !userEditedCb){
+      $('f-cashback').value = '';
+    }
+  }
+  const best = getBestBankFor(cat);
+  const hint = $('bestBankHint');
+  if(best && best.pct > pct){
+    const redir = findRedirector(best.bank);
+    const linkHtml = redir ? `<a href="${escapeAttr(redir.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--green);font-weight:700;text-decoration:underline;margin-left:6px;">Открыть ↗</a>` : '';
+    hint.innerHTML = `<div class="best-hint"><span>Выгоднее: <b>${escapeHtml(best.bank)} (${best.pct}%)</b>${linkHtml}</span><button type="button" data-pick-best="${escapeAttr(best.bank)}">Выбрать</button></div>`;
+    hint.style.display = 'block';
+  } else {
+    hint.style.display = 'none';
   }
 }
-['f-amount', 'f-bank', 'f-date'].forEach(id => $(id).addEventListener('input', ()=>autoCalculateCashback(false)));
+
+// ===== Renderers =====
+function renderAll(){
+  const d = new Date(viewYear, viewMonth, 1);
+  let lbl = d.toLocaleDateString('ru-RU', {month:'short', year:'numeric'}).replace('.', '');
+  $('monthLabel').textContent = lbl.charAt(0).toUpperCase() + lbl.slice(1);
+
+  renderMiniStats();
+  renderBankRedirectBar();
+  renderFormOptions();
+  renderTemplates();
+  renderReminderBanner();
+  renderTransactions();
+  renderCashbackView();
+  renderAnalyticsView();
+  renderSettingsView();
+  autoCalcCashback(false);
+}
+
+function renderMiniStats(){
+  const me = monthEntries();
+  const inc = me.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0);
+  const exp = me.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);
+  const cb = me.reduce((s,e)=>s+(e.cashback||0),0);
+  const bal = carryoverBalance() + inc - exp;
+  $('miniStats').innerHTML = `
+    <div class="mini-stat"><div class="k">Баланс</div><div class="v v-bal">${fmt(bal)}</div></div>
+    <div class="mini-stat"><div class="k">Расход</div><div class="v v-exp">${fmt(exp)}</div></div>
+    <div class="mini-stat"><div class="k">Кешбек</div><div class="v v-cb">+${fmt(cb)}</div></div>
+  `;
+}
+
+function renderBankRedirectBar(){
+  const arrowSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>`;
+  $('bankRedirectBar').innerHTML = redirectors.map(r => `
+    <a class="bank-pill" href="${escapeAttr(r.url)}" target="_blank" rel="noopener noreferrer" data-redir-bank="${escapeAttr(r.name)}">
+      <span class="bank-dot" style="background:${escapeAttr(r.color || '#f2b352')}"></span>
+      <span>${escapeHtml(r.name)}</span>
+      ${arrowSvg}
+    </a>
+  `).join('');
+}
+
+function renderFormOptions(){
+  const sel = $('f-category');
+  const curCat = sel.value;
+  sel.innerHTML = categoryList.map(c => `<option value="${escapeAttr(c.name)}">${c.emoji} ${escapeHtml(c.name)}</option>`).join('');
+  if(catNames().includes(curCat)) sel.value = curCat;
+
+  const banks = allKnownBanks();
+  $('bankSuggestions').innerHTML = banks.map(b => `<option value="${escapeAttr(b)}">`).join('');
+  const curBank = $('f-bank').value;
+  $('bankChips').innerHTML = banks.slice(0, 7).map(b =>
+    `<span class="chip ${b===curBank?'active':''}" data-bank="${escapeAttr(b)}">${escapeHtml(b)}</span>`
+  ).join('');
+}
 
 function renderTemplates(){
-  const wrap = $('tplChipsWrap'); if(!wrap) return;
-  if(!quickTemplates.length){ wrap.innerHTML = '<span style="font-size:0.75rem;color:var(--muted);">Нет шаблонов. Нажми «⚡ Шаблон».</span>'; return; }
-  wrap.innerHTML = quickTemplates.map((t, i)=>`<span class="tpl-chip" data-tpl-idx="${i}" style="background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:4px 10px;font-size:0.75rem;cursor:pointer;font-weight:600;">${escapeHtml(t.desc)} ${t.amount?t.amount+'₽':''} <span style="color:var(--red);cursor:pointer;" data-del="${i}">✕</span></span>`).join('');
+  const row = $('tplRow');
+  if(!quickTemplates.length){
+    row.innerHTML = `<span style="font-size:0.75rem;color:var(--muted);">Сохраняй частые траты кнопкой «+ Шаблон»</span>`;
+    return;
+  }
+  row.innerHTML = quickTemplates.map((t,i) => `
+    <span class="tpl-chip" data-tpl="${i}">
+      <span>${escapeHtml(t.desc)}${t.amount ? ' · ' + escapeHtml(t.amount) + '₽' : ''}</span>
+      <span class="x" data-del-tpl="${i}">✕</span>
+    </span>
+  `).join('');
 }
-$('tplChipsWrap').addEventListener('click', ev=>{
-  const del = ev.target.closest('[data-del]');
-  if(del){ quickTemplates.splice(Number(del.dataset.del), 1); localStorage.setItem(TEMPLATES_KEY, JSON.stringify(quickTemplates)); renderTemplates(); return; }
-  const chip = ev.target.closest('[data-tpl-idx]'); if(!chip) return;
-  const t = quickTemplates[Number(chip.dataset.tplIdx)];
-  if(!t) return;
-  $('f-desc').value = t.desc || '';
-  if(t.cat) $('f-category').value = t.cat;
-  if(t.bank) $('f-bank').value = t.bank;
-  if(t.amount) $('f-amount').value = t.amount;
-  updateBankChips(); autoCalculateCashback(true);
-  if(t.amount) $('entryForm').requestSubmit();
-});
-$('saveAsTplBtn').addEventListener('click', ()=>{
-  const desc = $('f-desc').value.trim();
-  if(!desc) return;
-  quickTemplates.push({ desc, amount: $('f-amount').value.trim(), cat: $('f-category').value, bank: $('f-bank').value.trim() });
-  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(quickTemplates));
-  renderTemplates();
-  showToast('Шаблон сохранен ✓');
+
+function renderReminderBanner(){
+  const banner = $('cbReminderBanner');
+  const key = monthKeyFor(viewYear, viewMonth);
+  const dismissed = localStorage.getItem(CB_DISMISS_KEY) === key;
+  const plan = currentPlanList();
+  const hasRates = plan.some(b => b.bank && (Number(b.base)>0 || Object.keys(b.rates||{}).length>0));
+  const now = new Date();
+  const isCurrent = (viewYear===now.getFullYear() && viewMonth===now.getMonth());
+  if(!hasRates && isCurrent && !dismissed){
+    const mName = new Date(viewYear, viewMonth, 1).toLocaleDateString('ru-RU', {month:'long'});
+    $('cbReminderText').innerHTML = `<b>Кешбек на ${escapeHtml(mName)} не заполнен.</b> Внеси категории банков, чтобы трекер сам считал кешбек.`;
+    banner.hidden = false;
+  } else {
+    banner.hidden = true;
+  }
+}
+
+function renderTransactions(){
+  const bSel = $('historyBankFilter'), cSel = $('historyCatFilter');
+  const curB = bSel.value, curC = cSel.value;
+  const usedBanks = [...new Set(entries.map(e=>e.bank).filter(Boolean))].sort();
+  const usedCats = [...new Set(entries.map(e=>e.category).filter(Boolean))].sort();
+  bSel.innerHTML = '<option value="">Все банки</option>' + usedBanks.map(b=>`<option value="${escapeAttr(b)}">${escapeHtml(b)}</option>`).join('');
+  cSel.innerHTML = '<option value="">Все категории</option>' + usedCats.map(c=>`<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
+  if(usedBanks.includes(curB)) bSel.value = curB;
+  if(usedCats.includes(curC)) cSel.value = curC;
+
+  const q = $('historySearch').value.trim().toLowerCase();
+  const fB = bSel.value, fC = cSel.value;
+
+  const list = [...entries].reverse().filter(e => {
+    if(fB && e.bank !== fB) return false;
+    if(fC && e.category !== fC) return false;
+    if(q && !`${e.desc||''} ${e.category||''} ${e.bank||''} ${e.amount||''}`.toLowerCase().includes(q)) return false;
+    return true;
+  }).sort((a,b) => b.date.localeCompare(a.date));
+
+  $('historyCount').textContent = (q || fB || fC) ? `${list.length} из ${entries.length}` : `${entries.length}`;
+
+  const wrap = $('txContainer');
+  if(!list.length){
+    wrap.innerHTML = `<div class="empty">${entries.length ? 'Ничего не найдено' : 'Пока нет записей — добавь первую выше'}</div>`;
+    return;
+  }
+
+  let prevMonth = '';
+  let html = '';
+  list.forEach(e => {
+    const mk = e.date.slice(0,7);
+    const d = new Date(e.date + 'T00:00:00');
+    if(mk !== prevMonth){
+      if(prevMonth) html += '</div>';
+      const mTitle = d.toLocaleDateString('ru-RU', {month:'long', year:'numeric'});
+      html += `<div class="tx-month-hdr">${escapeHtml(mTitle)}</div><div class="tx-list">`;
+      prevMonth = mk;
+    }
+    const isExp = e.type === 'expense';
+    const dFmt = d.toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'});
+    const ico = isExp ? catEmoji(e.category) : '💰';
+    html += `
+      <div class="tx-item">
+        <div class="tx-ico">${ico}</div>
+        <div class="tx-main" data-edit="${e.id}">
+          <div class="tx-desc">${escapeHtml(e.desc)}</div>
+          <div class="tx-meta">
+            <span>${dFmt}</span>
+            ${e.bank ? `<span class="tx-tag">${escapeHtml(e.bank)}</span>` : ''}
+            ${isExp && e.category ? `<span>${escapeHtml(e.category)}</span>` : ''}
+          </div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amt ${isExp?'v-exp':'v-inc'}">${isExp?'−':'+'}${fmt(e.amount)}</div>
+          ${e.cashback ? `<div class="tx-cb">+${fmt(e.cashback)}</div>` : ''}
+        </div>
+        <div class="tx-acts">
+          <button type="button" class="tx-act-btn del" data-del="${e.id}" aria-label="Удалить">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+function renderCashbackView(){
+  const plan = currentPlanList();
+  const cards = $('cbBankCards');
+  if(!plan.length){
+    cards.innerHTML = '<div class="empty">Добавь банки и их категории кешбека на этот месяц</div>';
+  } else {
+    cards.innerHTML = plan.map(b => {
+      const used = Object.keys(b.rates || {});
+      const avail = catNames().filter(c => !used.includes(c));
+      const pills = used.map(c => `
+        <span class="cb-pill">${catEmoji(c)} ${escapeHtml(c)} <b>${b.rates[c]}%</b>
+          <button type="button" data-cb-act="del-rate" data-bank="${b.id}" data-cat="${escapeAttr(c)}">✕</button>
+        </span>`).join('');
+      const addRow = avail.length ? `
+        <div class="cb-add-row">
+          <select data-role="cat-sel" data-bank="${b.id}">
+            ${avail.map(c=>`<option value="${escapeAttr(c)}">${catEmoji(c)} ${escapeHtml(c)}</option>`).join('')}
+          </select>
+          <input type="text" inputmode="decimal" data-role="cat-pct" data-bank="${b.id}" placeholder="%"/>
+          <button type="button" class="btn btn-primary btn-sm" data-cb-act="add-rate" data-bank="${b.id}" style="padding:0 14px;">+</button>
+        </div>` : '';
+      return `
+        <div class="cb-bank-card">
+          <div class="cb-bank-head">
+            <input type="text" data-role="bank-name" data-bank="${b.id}" value="${escapeAttr(b.bank)}" placeholder="Банк"/>
+            <span class="cb-base">на всё <input type="text" inputmode="decimal" data-role="bank-base" data-bank="${b.id}" value="${b.base ?? ''}"/>%</span>
+            <button type="button" class="tx-act-btn del" data-cb-act="del-bank" data-bank="${b.id}">✕</button>
+          </div>
+          <div class="cb-pills">${pills}</div>
+          ${addRow}
+        </div>`;
+    }).join('');
+  }
+  renderBestCardsSummary(plan);
+}
+
+function renderBestCardsSummary(plan){
+  const wrap = $('cbSummaryWrap');
+  const valid = plan.filter(b => b.bank && (Number(b.base)>0 || Object.keys(b.rates||{}).length));
+  if(!valid.length){
+    wrap.innerHTML = '<div class="empty">Заполни условия банков ниже — здесь появится шпаргалка лучшей карты</div>';
+    return;
+  }
+  const renderBadges = rates => {
+    const sorted = rates.slice().sort((a,b) => b.pct - a.pct);
+    const max = sorted[0].pct;
+    return sorted.map(r => {
+      const redir = findRedirector(r.bank);
+      const cls = 'cb-badge' + (r.pct===max ? ' best' : '');
+      if(redir){
+        return `<a class="${cls}" href="${escapeAttr(redir.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.bank)} <b>${r.pct}%</b> ↗</a>`;
+      }
+      return `<span class="${cls}">${escapeHtml(r.bank)} <b>${r.pct}%</b></span>`;
+    }).join('');
+  };
+
+  const rows = [];
+  catNames().forEach(cat => {
+    if(!valid.some(b => b.rates && b.rates[cat] !== undefined)) return;
+    const rates = valid.map(b => ({
+      bank:b.bank,
+      pct:(b.rates && b.rates[cat]!==undefined) ? Number(b.rates[cat]) : Number(b.base||0)
+    })).filter(r => r.pct > 0);
+    if(!rates.length) return;
+    rows.push(`<div class="best-row"><div class="best-cat">${catEmoji(cat)} ${escapeHtml(cat)}</div><div class="best-badges">${renderBadges(rates)}</div></div>`);
+  });
+  const baseRates = valid.map(b => ({ bank:b.bank, pct:Number(b.base||0) })).filter(r => r.pct > 0);
+  if(baseRates.length){
+    rows.push(`<div class="best-row"><div class="best-cat">🌐 Всё остальное</div><div class="best-badges">${renderBadges(baseRates)}</div></div>`);
+  }
+  wrap.innerHTML = rows.join('');
+}
+
+// ===== Analytics + Interactive Balance Dynamics Chart =====
+const DYN = { DAY_W:26, H:190, padL:12, padR:12, padT:14, padB:26, AXIS_W:44 };
+let dynModel = null, dynSelectedDay = null;
+
+function niceStep(rough){
+  const exp = Math.floor(Math.log10(rough));
+  const f = rough / Math.pow(10, exp);
+  const nf = f<=1 ? 1 : f<=2 ? 2 : f<=2.5 ? 2.5 : f<=5 ? 5 : 10;
+  return nf * Math.pow(10, exp);
+}
+function niceScale(min, max, count){
+  if(max - min < 1) max = min + 100;
+  const step = niceStep((max - min) / count);
+  const lo = Math.floor(min / step + 1e-9) * step;
+  const hi = Math.ceil(max / step - 1e-9) * step;
+  const ticks = [];
+  for(let v=lo; v<=hi+step/2; v+=step) ticks.push(Math.round(v*100)/100);
+  return { lo, hi, ticks };
+}
+function axisMoney(v){
+  const a = Math.abs(v), sign = v < 0 ? '−' : '';
+  if(a >= 1000) return sign + String(parseFloat((a/1000).toFixed(1))).replace('.',',') + 'к';
+  return sign + Math.round(a);
+}
+
+function renderAnalyticsView(){
+  const me = monthEntries();
+  const inc = me.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0);
+  const exp = me.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);
+  const cb = me.reduce((s,e)=>s+(e.cashback||0),0);
+  const carry = carryoverBalance();
+  const endBal = carry + inc - exp;
+
+  $('analyticsSummary').innerHTML = `
+    <div class="stat-box span2"><div class="k">Баланс на конец месяца</div><div class="v" style="color:var(--accent);font-size:1.45rem;">${fmt(endBal)}</div></div>
+    <div class="stat-box"><div class="k">Доход</div><div class="v v-inc">+${fmt(inc)}</div></div>
+    <div class="stat-box"><div class="k">Расход</div><div class="v v-exp">−${fmt(exp)}</div></div>
+    <div class="stat-box"><div class="k">Кешбек</div><div class="v v-cb">+${fmt(cb)}</div></div>
+    <div class="stat-box"><div class="k">С пред. месяца</div><div class="v" style="color:${carry>=0?'var(--green)':'var(--red)'}">${fmt(carry)}</div></div>
+  `;
+
+  // Category breakdown
+  const totals = {};
+  me.filter(e=>e.type==='expense').forEach(e => {
+    const c = e.category || 'Другое';
+    totals[c] = (totals[c] || 0) + e.amount;
+  });
+  const rows = Object.entries(totals).sort((a,b) => b[1] - a[1]);
+  $('categoryBreakdown').innerHTML = rows.length ? rows.map(([name, amt]) => {
+    const pct = exp ? (amt / exp * 100) : 0;
+    return `
+      <div class="cat-bar-row">
+        <div class="cat-bar-top">
+          <span>${catEmoji(name)} ${escapeHtml(name)}</span>
+          <span><b>${fmt(amt)}</b> <span style="color:var(--muted);font-size:0.78rem;">${pct.toFixed(1)}%</span></span>
+        </div>
+        <div class="cat-track"><div class="cat-fill" style="width:${pct}%;background:${catColor(name)}"></div></div>
+      </div>`;
+  }).join('') : '<div class="empty">Нет расходов в этом месяце</div>';
+
+  // Bank breakdown
+  const banks = {};
+  me.forEach(e => {
+    const k = e.bank || 'Без банка';
+    if(!banks[k]) banks[k] = { spent:0, cb:0, cnt:0 };
+    if(e.type==='expense') banks[k].spent += e.amount;
+    banks[k].cb += (e.cashback || 0);
+    banks[k].cnt++;
+  });
+  const bKeys = Object.keys(banks);
+  $('bankBreakdown').innerHTML = bKeys.length ? bKeys.map(k => `
+    <div class="bank-stat-card">
+      <div class="bn">${escapeHtml(k)}</div>
+      <div class="br"><span>Траты</span><b>${fmt(banks[k].spent)}</b></div>
+      <div class="br"><span>Кешбек</span><b style="color:var(--accent)">+${fmt(banks[k].cb)}</b></div>
+      <div class="br"><span>Операций</span><b>${banks[k].cnt}</b></div>
+    </div>`).join('') : '<div class="empty" style="grid-column:1/-1;">Нет операций</div>';
+
+  // Dynamics model
+  const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+  const dInc = new Array(daysInMonth+1).fill(0), dExp = new Array(daysInMonth+1).fill(0);
+  let lastDay = 0;
+  me.forEach(e => {
+    const day = Number(e.date.slice(8,10));
+    if(day<1 || day>daysInMonth) return;
+    if(e.type==='income') dInc[day] += e.amount; else dExp[day] += e.amount;
+    if(day > lastDay) lastDay = day;
+  });
+  const today = new Date();
+  const diffM = (viewYear - today.getFullYear())*12 + (viewMonth - today.getMonth());
+  let shown = daysInMonth;
+  if(diffM === 0) shown = Math.min(daysInMonth, Math.max(today.getDate(), lastDay));
+  else if(diffM > 0) shown = lastDay;
+
+  let cum = Math.round(carry*100)/100;
+  const series = [];
+  for(let d=1; d<=shown; d++){
+    cum = Math.round((cum + dInc[d] - dExp[d])*100)/100;
+    series.push({ day:d, balance:cum, inc:dInc[d], exp:dExp[d] });
+  }
+  dynModel = { daysInMonth, shown, series };
+  dynSelectedDay = shown || null;
+  drawDynamics();
+}
+
+function drawDynamics(){
+  const svg = $('dynamicsChart'), axis = $('dynamicsAxis');
+  const ns = 'http://www.w3.org/2000/svg';
+  svg.innerHTML = ''; axis.innerHTML = '';
+  const m = dynModel; if(!m) return;
+  const { DAY_W, H, padL, padR, padT, padB, AXIS_W } = DYN;
+  const W = padL + padR + (m.daysInMonth - 1) * DAY_W;
+  axis.setAttribute('width', AXIS_W); axis.setAttribute('height', H);
+
+  const mk = (tag, attrs, parent) => {
+    const el = document.createElementNS(ns, tag);
+    for(const k in attrs) el.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(el);
+    return el;
+  };
+
+  if(m.shown === 0){
+    svg.setAttribute('width', 0);
+    $('dynReadout').innerHTML = '<div class="dyn-date">В этом месяце ещё нет операций</div>';
+    $('dynCaption').textContent = '';
+    return;
+  }
+  svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  const vals = m.series.map(s=>s.balance);
+  const maxV = Math.max(...vals), minV = Math.min(...vals);
+  const sc = niceScale(Math.min(0, minV), Math.max(0, maxV), 4);
+  const xFor = d => padL + (d-1)*DAY_W;
+  const yFor = v => padT + (H-padT-padB) * (1 - (v-sc.lo)/(sc.hi-sc.lo));
+
+  sc.ticks.forEach(t => {
+    const y = yFor(t);
+    const attrs = { x1:0, x2:W, y1:y, y2:y, stroke:t===0 ? '#3b4252' : 'rgba(255,255,255,0.06)', 'stroke-width':1 };
+    if(t===0) attrs['stroke-dasharray'] = '4,4';
+    mk('line', attrs);
+    mk('text', { x:AXIS_W-6, y:y+3.5, 'text-anchor':'end', fill:'#8e96a6', 'font-size':10 }, axis).textContent = axisMoney(t);
+  });
+
+  for(let d=1; d<=m.daysInMonth; d++){
+    const x = xFor(d);
+    const isSel = d === dynSelectedDay;
+    const future = d > m.shown;
+    mk('text', {
+      x, y:H-8, 'text-anchor':'middle', 'font-size':10, 'font-weight':isSel?700:400,
+      fill:isSel ? '#f2b352' : (future ? '#434a59' : '#8e96a6')
+    }).textContent = d;
+  }
+
+  const zeroY = yFor(0);
+  const pts = m.series.map(s => [xFor(s.day), yFor(s.balance)]);
+  const lineD = pts.map((p,i) => (i?'L':'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  mk('path', { d:`${lineD} L ${pts[pts.length-1][0].toFixed(1)} ${zeroY.toFixed(1)} L ${pts[0][0].toFixed(1)} ${zeroY.toFixed(1)} Z`, fill:'#f2b352', 'fill-opacity':0.14 });
+  mk('path', { d:lineD, fill:'none', stroke:'#f2b352', 'stroke-width':2.5, 'stroke-linejoin':'round', 'stroke-linecap':'round' });
+
+  const sel = m.series[dynSelectedDay-1];
+  mk('line', { x1:xFor(sel.day), x2:xFor(sel.day), y1:padT, y2:H-padB, stroke:'#f2b352', 'stroke-width':1, 'stroke-dasharray':'3,3', opacity:0.7 });
+  m.series.forEach(s => mk('circle', { cx:xFor(s.day), cy:yFor(s.balance), r:3, fill:'#f2b352', stroke:'#13161d', 'stroke-width':1.5 }));
+  mk('circle', { cx:xFor(sel.day), cy:yFor(sel.balance), r:7, fill:'none', stroke:'#f2b352', 'stroke-width':2 });
+  m.series.forEach(s => mk('rect', { x:xFor(s.day)-DAY_W/2, y:0, width:DAY_W, height:H, fill:'transparent', 'data-day':s.day, style:'cursor:pointer' }));
+
+  const dateStr = new Date(viewYear, viewMonth, sel.day).toLocaleDateString('ru-RU', {weekday:'short', day:'numeric', month:'long'});
+  const delta = (sel.inc || sel.exp)
+    ? (sel.inc ? `<span class="v-inc">+${fmt(sel.inc)}</span>` : '') + (sel.exp ? `<span class="v-exp">−${fmt(sel.exp)}</span>` : '')
+    : '<span style="color:var(--muted)">без операций</span>';
+  $('dynReadout').innerHTML = `<div class="dyn-date">${dateStr}</div><div class="dyn-row"><span class="dyn-bal">${fmt(sel.balance)}</span><span class="dyn-delta">${delta}</span></div>`;
+  $('dynCaption').textContent = 'Нажми на любой день на графике, чтобы увидеть детали.';
+}
+
+function scrollDynamicsToSelected(){
+  const sc = $('dynamicsScroll');
+  if(!sc || !dynModel || !dynSelectedDay || !sc.clientWidth) return;
+  const x = DYN.padL + (dynSelectedDay-1)*DYN.DAY_W;
+  sc.scrollLeft = Math.max(0, x - sc.clientWidth/2);
+}
+$('dynamicsChart').addEventListener('click', ev => {
+  const r = ev.target.closest('rect[data-day]');
+  if(!r) return;
+  dynSelectedDay = Number(r.getAttribute('data-day'));
+  drawDynamics();
 });
 
-function guessCat(desc){
-  const l = desc.toLowerCase();
-  if(/кофе|бургер|мак|обед|шаурм|пицц|кафе|kfc|додо/i.test(l)) return 'Фастфуд';
-  if(/пятерочк|магнит|лента|ашан|вкусвилл|продукт|молок|хлеб/i.test(l)) return 'Продукты';
-  if(/такси|метро|автобус|бензин|азс|проезд/i.test(l)) return 'Транспорт';
-  return $('f-category').value;
+// ===== Settings View =====
+function renderSettingsView(){
+  $('redirEditorList').innerHTML = redirectors.map((r, i) => `
+    <div class="redir-row">
+      <div class="redir-top">
+        <span class="bank-dot" style="background:${escapeAttr(r.color || '#f2b352')}"></span>
+        <input type="text" data-redir-idx="${i}" data-redir-f="name" value="${escapeAttr(r.name)}" placeholder="Название банка"/>
+        <button type="button" class="tx-act-btn del" data-del-redir="${i}">✕</button>
+      </div>
+      <div class="redir-url">
+        <input type="text" data-redir-idx="${i}" data-redir-f="url" value="${escapeAttr(r.url)}" placeholder="https://... или shortcuts://run-shortcut?name=..."/>
+        <a href="${escapeAttr(r.url)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="padding:7px 10px;">Тест ↗</a>
+      </div>
+    </div>
+  `).join('');
+
+  $('catManageList').innerHTML = categoryList.map((c,i) => `
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input type="text" data-cat-idx="${i}" data-cat-f="emoji" value="${escapeAttr(c.emoji)}" style="width:48px;text-align:center;padding:8px 4px;"/>
+      <input type="text" data-cat-idx="${i}" data-cat-f="name" value="${escapeAttr(c.name)}" style="flex:1;padding:8px 10px;"/>
+      <button type="button" class="tx-act-btn del" data-del-cat="${i}">✕</button>
+    </div>
+  `).join('');
+
+  const base = location.href.split('?')[0];
+  $('shortcutUrlBox').textContent = `${base}?add=1&amount=250&desc=Кофе&cat=Фастфуд&bank=Т-Банк&auto=1`;
 }
-function handleQuick(){
-  const val = $('smartQuickInput').value.trim(); if(!val) return;
-  let tokens = val.split(/\s+/); let amount = NaN;
-  for(let i=0; i<tokens.length; i++){ const n = parseNum(tokens[i]); if(!isNaN(n) && n>0){ amount = n; tokens.splice(i,1); break; } }
-  let bank = ''; const known = allKnownBanks();
+
+// ===== Toast =====
+let toastTimer = null;
+function showToast(msg, undoFn){
+  const t = $('toast');
+  t.innerHTML = `<span>${escapeHtml(msg)}</span>` + (undoFn ? '<button type="button" id="undoBtn">Отменить</button>' : '');
+  t.hidden = false;
+  clearTimeout(toastTimer);
+  if(undoFn){
+    $('undoBtn').addEventListener('click', () => { t.hidden = true; clearTimeout(toastTimer); undoFn(); });
+  }
+  toastTimer = setTimeout(() => { t.hidden = true; }, 6000);
+}
+
+// ===== Events: Month Switch =====
+$('prevMonth').addEventListener('click', () => {
+  viewMonth--; if(viewMonth < 0){ viewMonth = 11; viewYear--; }
+  $('f-date').value = defaultDateForView();
+  renderAll();
+});
+$('nextMonth').addEventListener('click', () => {
+  viewMonth++; if(viewMonth > 11){ viewMonth = 0; viewYear++; }
+  $('f-date').value = defaultDateForView();
+  renderAll();
+});
+
+// ===== Events: Type Toggle & Form =====
+$('typeToggle').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-type]'); if(!b) return;
+  currentType = b.dataset.type;
+  $('typeToggle').querySelectorAll('button').forEach(x => x.classList.toggle('active', x===b));
+  const isInc = currentType === 'income';
+  $('categoryField').style.display = isInc ? 'none' : 'block';
+  $('cashbackField').style.display = isInc ? 'none' : 'block';
+  $('bestBankHint').style.display = 'none';
+  $('descLabel').textContent = isInc ? 'Источник дохода' : 'Описание';
+  $('bankLabel').textContent = isInc ? 'Куда пришло' : 'Банк';
+  if(!isInc) autoCalcCashback(false);
+});
+
+$('bankChips').addEventListener('click', ev => {
+  const c = ev.target.closest('.chip'); if(!c) return;
+  $('f-bank').value = c.dataset.bank;
+  renderFormOptions();
+  autoCalcCashback(false);
+});
+$('f-bank').addEventListener('input', () => { renderFormOptions(); autoCalcCashback(false); });
+$('f-amount').addEventListener('input', () => autoCalcCashback(false));
+$('f-category').addEventListener('change', () => autoCalcCashback(false));
+$('f-cashback').addEventListener('input', () => { userEditedCb = $('f-cashback').value.trim() !== ''; });
+$('autoCbBadge').addEventListener('click', () => { userEditedCb = false; autoCalcCashback(true); });
+$('bestBankHint').addEventListener('click', ev => {
+  const btn = ev.target.closest('[data-pick-best]'); if(!btn) return;
+  $('f-bank').value = btn.dataset.pickBest;
+  renderFormOptions();
+  userEditedCb = false;
+  autoCalcCashback(true);
+});
+
+// Auto-guess category by description
+function guessCategory(desc){
+  const l = (desc||'').toLowerCase();
+  const prev = [...entries].reverse().find(e => e.type==='expense' && e.category && (e.desc||'').toLowerCase()===l);
+  if(prev && catNames().includes(prev.category)) return prev.category;
+  const rules = [
+    { re:/кофе|бургер|мак|вкусно|шаурм|пицц|кафе|обед|ресторан|столов|додо|kfc|rostic/i, cat:'Фастфуд' },
+    { re:/пятерочк|пятёрочк|магнит|перекресток|перекрёсток|лента|ашан|вкусвилл|монетка|хлеб|молок|продукт/i, cat:'Продукты' },
+    { re:/такси|автобус|метро|проезд|бензин|азс|самокат|яндекс го/i, cat:'Транспорт' },
+    { re:/аптек|врач|лекарств|анализ|клиник|стоматолог/i, cat:'Здоровье' },
+    { re:/озон|ozon|wb|вайлдберриз|wildberries|доставк|курьер/i, cat:'Доставка' },
+    { re:/жкх|интернет|связь|мтс|билайн|мегафон|теле2|t2|аренд|квартплат|подписк/i, cat:'Ежемесячные' },
+    { re:/кино|театр|игр|steam|бар|кальян|концерт/i, cat:'Развлечения' }
+  ];
+  for(const r of rules){
+    if(r.re.test(l) && catNames().includes(r.cat)) return r.cat;
+  }
+  return $('f-category').value || catNames()[0];
+}
+
+$('f-desc').addEventListener('blur', () => {
+  if(currentType !== 'expense') return;
+  const v = $('f-desc').value.trim(); if(!v) return;
+  const g = guessCategory(v);
+  if(g && catNames().includes(g)){ $('f-category').value = g; autoCalcCashback(false); }
+});
+
+// Quick 1-line input
+function runSmartInput(){
+  const raw = $('smartInput').value.trim(); if(!raw) return;
+  let tokens = raw.split(/\s+/);
+  let amt = NaN;
+  for(let i=0; i<tokens.length; i++){
+    const n = parseNum(tokens[i]);
+    if(!isNaN(n) && n>0){ amt = n; tokens.splice(i,1); break; }
+  }
+  let bank = '';
+  const known = allKnownBanks();
   for(let i=tokens.length-1; i>=0; i--){
-    const m = known.find(b => b.toLowerCase().startsWith(tokens[i].toLowerCase()));
+    const w = tokens[i].toLowerCase();
+    const m = known.find(b => b.toLowerCase().startsWith(w) && w.length >= 2);
     if(m){ bank = m; tokens.splice(i,1); break; }
   }
-  const desc = tokens.join(' ') || 'Покупка';
-  const cat = guessCat(desc);
-  $('f-desc').value = desc; $('f-category').value = cat;
+  const desc = tokens.join(' ').trim() || 'Покупка';
+  const cat = guessCategory(desc);
+  if(!bank){
+    const best = getBestBankFor(cat);
+    bank = best ? best.bank : $('f-bank').value;
+  }
+  if(currentType !== 'expense') $('typeToggle').querySelector('[data-type="expense"]').click();
+  $('f-desc').value = desc;
+  $('f-category').value = cat;
   if(bank) $('f-bank').value = bank;
-  if(!isNaN(amount)) $('f-amount').value = String(amount).replace('.', ',');
-  updateBankChips(); autoCalculateCashback(true);
-  $('smartQuickInput').value = '';
-  $('entryForm').requestSubmit();
+  renderFormOptions();
+  if(!isNaN(amt) && amt>0){
+    $('f-amount').value = String(amt).replace('.', ',');
+    userEditedCb = false;
+    autoCalcCashback(true);
+    $('smartInput').value = '';
+    $('entryForm').requestSubmit();
+  } else {
+    $('smartInput').value = '';
+    $('f-amount').focus();
+  }
 }
-$('smartQuickBtn').addEventListener('click', handleQuick);
-$('smartQuickInput').addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); handleQuick(); } });
+$('smartAddBtn').addEventListener('click', runSmartInput);
+$('smartInput').addEventListener('keydown', ev => { if(ev.key==='Enter'){ ev.preventDefault(); runSmartInput(); } });
 
-$('entryForm').addEventListener('submit', e=>{
-  e.preventDefault();
+// Templates
+$('saveTplBtn').addEventListener('click', () => {
+  const desc = $('f-desc').value.trim();
+  if(!desc){ showToast('Сначала введи описание в форме'); $('f-desc').focus(); return; }
+  quickTemplates.push({
+    desc,
+    amount:$('f-amount').value.trim(),
+    cat:$('f-category').value,
+    bank:$('f-bank').value.trim()
+  });
+  saveTemplates(); renderTemplates();
+  showToast('Шаблон сохранён');
+});
+$('tplRow').addEventListener('click', ev => {
+  const del = ev.target.closest('[data-del-tpl]');
+  if(del){
+    ev.stopPropagation();
+    quickTemplates.splice(Number(del.dataset.delTpl), 1);
+    saveTemplates(); renderTemplates(); return;
+  }
+  const chip = ev.target.closest('[data-tpl]'); if(!chip) return;
+  const t = quickTemplates[Number(chip.dataset.tpl)]; if(!t) return;
+  if(currentType !== 'expense') $('typeToggle').querySelector('[data-type="expense"]').click();
+  $('f-desc').value = t.desc || '';
+  if(t.cat && catNames().includes(t.cat)) $('f-category').value = t.cat;
+  const b = t.bank || (getBestBankFor($('f-category').value)?.bank || '');
+  if(b) $('f-bank').value = b;
+  renderFormOptions();
+  if(t.amount){
+    $('f-amount').value = t.amount;
+    userEditedCb = false; autoCalcCashback(true);
+    $('entryForm').requestSubmit();
+  } else {
+    autoCalcCashback(true); $('f-amount').focus();
+  }
+});
+
+// Submit entry
+$('entryForm').addEventListener('submit', ev => {
+  ev.preventDefault();
   const date = $('f-date').value;
   const desc = $('f-desc').value.trim();
   const amount = parseNum($('f-amount').value);
   const bank = $('f-bank').value.trim();
   const isExp = currentType === 'expense';
-  const cashback = isExp ? (parseNum($('f-cashback').value) || 0) : undefined;
+  const cbRaw = $('f-cashback').value.trim();
+  const cashback = isExp ? (cbRaw ? parseNum(cbRaw) : 0) : undefined;
   const category = isExp ? $('f-category').value : undefined;
 
-  if(!date || !desc || isNaN(amount) || amount<=0) return;
-  entries.push({ id: newId(), type: currentType, date, desc, amount, bank, cashback, category });
+  if(!date || !desc || isNaN(amount) || amount <= 0){ showToast('Проверь сумму и описание'); return; }
+  if(isExp && isNaN(cashback)){ showToast('Проверь поле кешбека'); return; }
+
+  const entry = { id:newId(), type:currentType, date, desc, amount, bank };
+  if(isExp){ entry.cashback = cashback; entry.category = category; }
+  entries.push(entry);
   saveEntries();
-  renderTable();
-  $('entryForm').reset();
-  $('f-date').value = ymd(new Date());
-  updateBankChips();
-  showToast('Добавлено ✓');
+
+  userEditedCb = false;
+  $('f-amount').value = '';
+  $('f-desc').value = '';
+  $('f-cashback').value = '';
+  renderAll();
+  showToast('Запись добавлена');
 });
 
-function renderTable(){
-  const tbody = $('tbody');
-  const q = $('historySearch').value.trim().toLowerCase();
-  const fBank = $('historyBankFilter').value;
-  const fCat = $('historyCatFilter').value;
+// History filters & actions
+['historySearch','historyBankFilter','historyCatFilter'].forEach(id => {
+  $(id).addEventListener('input', renderTransactions);
+  $(id).addEventListener('change', renderTransactions);
+});
+$('txContainer').addEventListener('click', ev => {
+  const del = ev.target.closest('[data-del]');
+  if(del){
+    const idx = entries.findIndex(e => e.id === del.dataset.del);
+    if(idx < 0) return;
+    const removed = entries.splice(idx, 1)[0];
+    saveEntries(); renderAll();
+    showToast('Удалено: ' + removed.desc, () => {
+      entries.splice(Math.min(idx, entries.length), 0, removed);
+      saveEntries(); renderAll();
+    });
+    return;
+  }
+  const ed = ev.target.closest('[data-edit]');
+  if(ed) openEdit(ed.dataset.edit);
+});
 
-  const banks = [...new Set(entries.map(e=>e.bank).filter(Boolean))].sort();
-  const cats = [...new Set(entries.map(e=>e.category).filter(Boolean))].sort();
-  $('historyBankFilter').innerHTML = '<option value="">Все банки</option>' + banks.map(b=>`<option value="${escapeAttr(b)}" ${b===fBank?'selected':''}>${escapeHtml(b)}</option>`).join('');
-  $('historyCatFilter').innerHTML = '<option value="">Все категории</option>' + cats.map(c=>`<option value="${escapeAttr(c)}" ${c===fCat?'selected':''}>${escapeHtml(c)}</option>`).join('');
-
-  const filtered = [...entries].reverse().filter(e=>{
-    if(fBank && e.bank !== fBank) return false;
-    if(fCat && e.category !== fCat) return false;
-    if(q && !`${e.desc} ${e.category} ${e.bank} ${e.amount}`.toLowerCase().includes(q)) return false;
-    return true;
+// ===== Edit Modal =====
+let editingId = null, editType = 'expense';
+function syncEditType(){
+  const isInc = editType === 'income';
+  $('editTypeToggle').querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.etype === editType));
+  $('eCatWrap').style.display = isInc ? 'none' : 'block';
+  $('eCbWrap').style.display = isInc ? 'none' : 'block';
+}
+function openEdit(id){
+  const e = entries.find(x => x.id === id); if(!e) return;
+  editingId = id; editType = e.type;
+  $('e-amount').value = String(e.amount).replace('.', ',');
+  $('e-date').value = e.date;
+  $('e-desc').value = e.desc || '';
+  $('e-bank').value = e.bank || '';
+  $('e-cashback').value = e.cashback ? String(e.cashback).replace('.', ',') : '';
+  $('e-category').innerHTML = categoryList.map(c => `<option value="${escapeAttr(c.name)}">${c.emoji} ${escapeHtml(c.name)}</option>`).join('');
+  if(e.category && catNames().includes(e.category)) $('e-category').value = e.category;
+  syncEditType();
+  $('editModal').hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+function closeEdit(){
+  $('editModal').hidden = true;
+  editingId = null;
+  document.body.style.overflow = '';
+}
+$('editTypeToggle').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-etype]'); if(!b) return;
+  editType = b.dataset.etype; syncEditType();
+});
+$('eCancel').addEventListener('click', closeEdit);
+$('editBg').addEventListener('click', closeEdit);
+$('eSave').addEventListener('click', () => {
+  const e = entries.find(x => x.id === editingId); if(!e){ closeEdit(); return; }
+  const amt = parseNum($('e-amount').value);
+  const desc = $('e-desc').value.trim();
+  const date = $('e-date').value;
+  if(!date || !desc || isNaN(amt) || amt <= 0){ showToast('Проверь сумму и описание'); return; }
+  const before = JSON.parse(JSON.stringify(e));
+  e.type = editType; e.date = date; e.desc = desc; e.amount = amt; e.bank = $('e-bank').value.trim();
+  if(editType === 'expense'){
+    e.category = $('e-category').value;
+    e.cashback = parseNum($('e-cashback').value) || 0;
+  } else {
+    delete e.category; delete e.cashback;
+  }
+  closeEdit(); saveEntries(); renderAll();
+  showToast('Сохранено', () => {
+    const cur = entries.find(x => x.id === before.id);
+    if(cur){ Object.keys(cur).forEach(k=>delete cur[k]); Object.assign(cur, before); saveEntries(); renderAll(); }
   });
+});
 
-  $('historyFilterCount').textContent = `Всего: ${entries.length}`;
-  if(!filtered.length){ tbody.innerHTML = ''; $('emptyState').style.display='block'; return; }
-  $('emptyState').style.display='none';
+// ===== Cashback View Events =====
+$('cbRemindOpen').addEventListener('click', () => switchView('cashback'));
+$('cbRemindCopy').addEventListener('click', () => { $('copyPrevPlanBtn').click(); });
+$('cbRemindDismiss').addEventListener('click', () => {
+  localStorage.setItem(CB_DISMISS_KEY, monthKeyFor(viewYear, viewMonth));
+  $('cbReminderBanner').hidden = true;
+});
 
-  tbody.innerHTML = filtered.map(e=>{
-    const d = new Date(e.date+'T00:00:00').toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});
-    const isExp = e.type==='expense';
-    return `<tr>
-      <td>${d}</td>
-      <td>${escapeHtml(e.desc)}</td>
-      <td>${e.category?escapeHtml(e.category):'—'}</td>
-      <td><span class="bank-tag">${escapeHtml(e.bank||'')}</span></td>
-      <td class="${isExp?'amt-expense':'amt-income'}">${isExp?'−':'+'}${fmt(e.amount)}</td>
-      <td class="cb">${e.cashback?'+'+fmt(e.cashback):'—'}</td>
-      <td><button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;" data-del="${e.id}">✕</button></td>
-    </tr>`;
-  }).join('');
+$('addBankPlanBtn').addEventListener('click', () => {
+  currentPlanList().push({ id:newId(), bank:'', base:'', rates:{} });
+  savePlans(); renderCashbackView();
+});
+$('copyPrevPlanBtn').addEventListener('click', () => {
+  const prev = cashbackPlans[prevMonthKey()];
+  if(!prev || !prev.length){ showToast('В прошлом месяце нет данных'); return; }
+  cashbackPlans[monthKeyFor(viewYear, viewMonth)] = JSON.parse(JSON.stringify(prev)).map(b => ({ ...b, id:newId() }));
+  savePlans(); renderAll(); showToast('Кешбек скопирован');
+});
+$('cbBankCards').addEventListener('input', ev => {
+  const t = ev.target, bid = t.dataset.bank; if(!bid) return;
+  const b = currentPlanList().find(x => x.id === bid); if(!b) return;
+  if(t.dataset.role === 'bank-name') b.bank = t.value;
+  if(t.dataset.role === 'bank-base') b.base = parseNum(t.value) || 0;
+  savePlans(); renderBestCardsSummary(currentPlanList()); renderReminderBanner();
+});
+$('cbBankCards').addEventListener('click', ev => {
+  const btn = ev.target.closest('[data-cb-act]'); if(!btn) return;
+  const act = btn.dataset.cbAct, bid = btn.dataset.bank;
+  const plan = currentPlanList(), b = plan.find(x => x.id === bid); if(!b) return;
+  if(act === 'del-bank') plan.splice(plan.indexOf(b), 1);
+  else if(act === 'del-rate') delete b.rates[btn.dataset.cat];
+  else if(act === 'add-rate'){
+    const card = btn.closest('.cb-bank-card');
+    const cat = card.querySelector('[data-role="cat-sel"]').value;
+    const pct = parseNum(card.querySelector('[data-role="cat-pct"]').value);
+    if(!cat || isNaN(pct)) return;
+    if(!b.rates) b.rates = {};
+    b.rates[cat] = pct;
+  }
+  savePlans(); renderAll();
+});
+
+// .ics Monthly Reminder for iOS Calendar
+$('icsBtn').addEventListener('click', () => {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth()+1, 1, 10, 0, 0);
+  const pad = n => String(n).padStart(2,'0');
+  const dt = `${next.getFullYear()}${pad(next.getMonth()+1)}01T100000`;
+  const appUrl = location.href.split('?')[0] + '?open=cashback';
+  const ics = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Finance Tracker//RU','BEGIN:VEVENT',
+    `UID:ft-cb-${Date.now()}@local`,
+    `DTSTART:${dt}`,`DTEND:${next.getFullYear()}${pad(next.getMonth()+1)}01T101500`,
+    'RRULE:FREQ=MONTHLY;BYMONTHDAY=1',
+    'SUMMARY:Обновить кешбек в банках',
+    `DESCRIPTION:1-е число месяца! Выбери категории кешбека и обнови трекер: ${appUrl}`,
+    `URL:${appUrl}`,
+    'BEGIN:VALARM','TRIGGER:-PT5M','ACTION:DISPLAY','DESCRIPTION:Выбрать кешбек','END:VALARM',
+    'END:VEVENT','END:VCALENDAR'
+  ].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], {type:'text/calendar;charset=utf-8'}));
+  a.download = 'cashback-reminder.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  showToast('Файл напоминания (.ics) скачан');
+});
+
+// ===== Settings Events =====
+$('redirEditorList').addEventListener('input', ev => {
+  const inp = ev.target.closest('[data-redir-idx]'); if(!inp) return;
+  const r = redirectors[Number(inp.dataset.redirIdx)]; if(!r) return;
+  r[inp.dataset.redirF] = inp.value.trim();
+  saveRedirectors(); renderBankRedirectBar(); renderFormOptions();
+});
+$('redirEditorList').addEventListener('click', ev => {
+  const del = ev.target.closest('[data-del-redir]'); if(!del) return;
+  redirectors.splice(Number(del.dataset.delRedir), 1);
+  saveRedirectors(); renderSettingsView(); renderBankRedirectBar();
+});
+$('addRedirBtn').addEventListener('click', () => {
+  redirectors.push({ id:newId(), name:'Новый банк', url:'https://', color:'#f2b352' });
+  saveRedirectors(); renderSettingsView(); renderBankRedirectBar();
+});
+$('resetRedirBtn').addEventListener('click', () => {
+  redirectors = JSON.parse(JSON.stringify(DEFAULT_REDIRECTORS));
+  saveRedirectors(); renderSettingsView(); renderBankRedirectBar();
+  showToast('Переходники сброшены');
+});
+
+// Category Manager
+$('catManageList').addEventListener('change', ev => {
+  const inp = ev.target.closest('[data-cat-idx]'); if(!inp) return;
+  const c = categoryList[Number(inp.dataset.catIdx)]; if(!c) return;
+  if(inp.dataset.catF === 'emoji'){
+    c.emoji = firstGrapheme(inp.value) || '🏷️';
+    inp.value = c.emoji;
+  } else {
+    const nn = inp.value.trim();
+    if(!nn){ inp.value = c.name; return; }
+    const old = c.name; c.name = nn;
+    entries.forEach(e => { if(e.category === old) e.category = nn; });
+    saveEntries();
+  }
+  saveCats(); renderAll();
+});
+$('catManageList').addEventListener('click', ev => {
+  const del = ev.target.closest('[data-del-cat]'); if(!del) return;
+  if(categoryList.length <= 1){ showToast('Нельзя удалить последнюю категорию'); return; }
+  categoryList.splice(Number(del.dataset.delCat), 1);
+  saveCats(); renderAll();
+});
+$('addCatBtn').addEventListener('click', () => {
+  const name = $('newCatName').value.trim(); if(!name) return;
+  const emoji = firstGrapheme($('newCatEmoji').value) || '🏷️';
+  if(!catNames().includes(name)){
+    categoryList.push({ name, emoji });
+    saveCats(); renderAll();
+    showToast('Категория добавлена');
+  }
+  $('newCatName').value = ''; $('newCatEmoji').value = '';
+});
+
+// Backup JSON (iOS Share Sheet + fallback)
+$('saveBackupBtn').addEventListener('click', async () => {
+  const obj = {
+    app:'Finance Tracker', backupVersion:3, exportedAt:new Date().toISOString(),
+    entries, cashbackPlans, categories:categoryList, bankLabels, redirectors, quickTemplates
+  };
+  const json = JSON.stringify(obj, null, 2);
+  const fname = `finance-tracker-${ymd(new Date())}.json`;
+  const blob = new Blob([json], {type:'application/json;charset=utf-8'});
+  try{
+    if(navigator.share && typeof File !== 'undefined'){
+      const file = new File([blob], fname, {type:'application/json'});
+      if(!navigator.canShare || navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:'Бэкап Finance Tracker'});
+        showToast('Бэкап сохранён'); return;
+      }
+    }
+  }catch(err){ if(err && err.name==='AbortError') return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = fname;
+  document.body.appendChild(a); a.click(); a.remove();
+  showToast('Бэкап скачан');
+});
+
+$('loadBackupInput').addEventListener('change', async ev => {
+  const file = ev.target.files[0]; if(!file) return;
+  try{
+    const parsed = JSON.parse(await file.text());
+    const list = Array.isArray(parsed) ? parsed : parsed.entries;
+    if(!Array.isArray(list)) throw new Error('Неверный формат файла');
+    if(!confirm(`Загрузить ${list.length} операций из бэкапа?`)) return;
+    entries = list;
+    if(parsed.cashbackPlans) cashbackPlans = parsed.cashbackPlans;
+    if(Array.isArray(parsed.categories) && parsed.categories.length) categoryList = parsed.categories;
+    if(Array.isArray(parsed.redirectors) && parsed.redirectors.length) redirectors = parsed.redirectors;
+    if(Array.isArray(parsed.quickTemplates)) quickTemplates = parsed.quickTemplates;
+    saveEntries(); savePlans(); saveCats(); saveRedirectors(); saveTemplates();
+    renderAll(); showToast(`Загружено: ${entries.length}`);
+  }catch(e){ showToast('Ошибка файла: ' + e.message); }
+  ev.target.value = '';
+});
+
+$('exportCsvBtn').addEventListener('click', () => {
+  if(!entries.length){ showToast('Нет операций'); return; }
+  const rows = [['Дата','Тип','Описание','Категория','Банк','Сумма','Кешбек'].join(';')];
+  [...entries].sort((a,b) => b.date.localeCompare(a.date)).forEach(e => {
+    rows.push([
+      e.date, e.type==='income'?'Доход':'Расход',
+      `"${String(e.desc||'').replace(/"/g,'""')}"`,
+      `"${String(e.category||'').replace(/"/g,'""')}"`,
+      `"${String(e.bank||'').replace(/"/g,'""')}"`,
+      String(e.amount||0).replace('.',','),
+      String(e.cashback||0).replace('.',',')
+    ].join(';'));
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF' + rows.join('\r\n')], {type:'text/csv;charset=utf-8'}));
+  a.download = `finance-${ymd(new Date())}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  showToast('CSV экспортирован');
+});
+
+$('copyShortcutBtn').addEventListener('click', async () => {
+  try{
+    await navigator.clipboard.writeText($('shortcutUrlBox').textContent);
+    showToast('Ссылка скопирована');
+  }catch(e){ showToast('Скопируй ссылку из рамки'); }
+});
+
+// ===== URL Commands (for iOS Shortcuts & Calendar) =====
+function handleUrlParams(){
+  const p = new URLSearchParams(location.search);
+  if(p.get('open') === 'cashback') switchView('cashback');
+  if(p.get('add') === '1' || p.has('amount')){
+    switchView('home');
+    const t = p.get('type') === 'income' ? 'income' : 'expense';
+    $('typeToggle').querySelector(`[data-type="${t}"]`)?.click();
+    if(p.get('desc')) $('f-desc').value = p.get('desc');
+    if(p.get('amount')) $('f-amount').value = p.get('amount');
+    if(p.get('bank')) $('f-bank').value = p.get('bank');
+    const cat = p.get('cat') || guessCategory($('f-desc').value);
+    if(cat && catNames().includes(cat)) $('f-category').value = cat;
+    renderFormOptions();
+    userEditedCb = false; autoCalcCashback(true);
+    if(p.get('auto') === '1' && $('f-desc').value && parseNum($('f-amount').value) > 0){
+      setTimeout(() => $('entryForm').requestSubmit(), 80);
+    }
+    if(history.replaceState) history.replaceState({}, document.title, location.pathname);
+  }
 }
 
-$('tbody').addEventListener('click', e=>{
-  const btn = e.target.closest('[data-del]'); if(!btn) return;
-  entries = entries.filter(x=>x.id !== btn.dataset.del);
-  saveEntries(); renderTable(); showToast('Удалено');
-});
-['historySearch','historyBankFilter','historyCatFilter'].forEach(id=>$(id).addEventListener('input', renderTable));
-['historyBankFilter','historyCatFilter'].forEach(id=>$(id).addEventListener('change', renderTable));
+// ===== Init =====
+loadAll();
+$('f-date').value = defaultDateForView();
+renderAll();
+handleUrlParams();
 
-function showToast(m){ const t = $('toast'); t.innerHTML = '<span>'+escapeHtml(m)+'</span>'; t.hidden=false; setTimeout(()=>t.hidden=true, 3000); }
-
-document.querySelectorAll('.type-toggle button').forEach(b=>b.addEventListener('click', ()=>{
-  document.querySelectorAll('.type-toggle button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active'); currentType = b.dataset.type;
-  $('cashbackField').style.display = currentType==='income'?'none':'block';
-  $('categoryField').style.display = currentType==='income'?'none':'block';
-}));
-
-$('f-date').value = ymd(new Date());
-$('f-date-text').value = new Date().toLocaleDateString();
-loadAllData(); updateCategorySelect(); updateBankChips(); renderTemplates(); renderTable(); renderIosBankBar();
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  try{ navigator.storage?.persist?.(); }catch(e){}
+}
 </script>
 </body>
 </html>
